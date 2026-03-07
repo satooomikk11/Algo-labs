@@ -8,7 +8,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Запуск тестов"
-./test_runner | tee вывод.txt
+./test_runner
 
 echo "Построение графиков"
 python3 plot_results.py
