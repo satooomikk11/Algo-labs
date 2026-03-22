@@ -1,0 +1,23 @@
+# Скомпилированные файлы
+*.o
+build/
+
+# Папки с тестами и результатами
+small_tests/
+big_tests/
+test_most_dublicates/
+results/
+
+# Временные файлы
+*.out
+*.in
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/
+*.swp
