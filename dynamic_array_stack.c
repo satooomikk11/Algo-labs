@@ -3,6 +3,11 @@
 #include <string.h>
 #include <assert.h>
 
+// коэффициенты управления размером массива
+const int ARRAY_GROWTH_FACTOR = 2;
+const int ARRAY_SHRINK_FACTOR = 4;
+const int ARRAY_MIN_CAPACITY  = 1000;
+
 Stack* array_stack_ctr(size_t size, size_t element_size)
 {
     Stack* st = (Stack*)calloc(1, sizeof(Stack));
@@ -29,7 +34,7 @@ Stack* array_stack_ctr(size_t size, size_t element_size)
 
 int array_stack_push(Stack* st, void* buffer)
 {
-    if (!st || !buffer) return 0;
+    if (!st || !buffer) return STACK_ERROR;
 
     assert(st->element_size > 0);
     assert(st->data != NULL);
@@ -37,11 +42,11 @@ int array_stack_push(Stack* st, void* buffer)
     // если массив заполнен - размер*2
     if (st->size >= st->capacity)
     {
-        size_t new_capacity = st->capacity * 2;
-        if (new_capacity < st->capacity) return 0; // переполнение
+        size_t new_capacity = st->capacity * ARRAY_GROWTH_FACTOR;
+        if (new_capacity < st->capacity) return STACK_ERROR; // переполнение
 
         void* new_data = realloc(st->data, new_capacity * st->element_size);
-        if (!new_data) return 0;
+        if (!new_data) return STACK_ERROR;
         
         st->data = new_data;
         st->capacity = new_capacity;
@@ -50,23 +55,37 @@ int array_stack_push(Stack* st, void* buffer)
     // копируем новый элемент в конец массива
     memcpy((char*)st->data + st->size * st->element_size, buffer, st->element_size);
     st->size++;
-    return 1;
+    return STACK_OK;
 }
 
 int array_stack_top(Stack* st, void* buffer)
 {
-    if (!st || !buffer || st->size == 0) return 0;
+    if (!st || !buffer || st->size == 0) return STACK_ERROR;
     
     memcpy(buffer, (char*)st->data + (st->size - 1) * st->element_size, st->element_size);
-    return 1;
+    return STACK_OK;
 }
 
 int array_stack_pop(Stack* st)
 {
-    if (!st || st->size == 0) return 0;
+    if (!st || st->size == 0) return STACK_ERROR;
     
     st->size--;
-    return 1;
+
+    // сужение массива, если размер стал меньше 1/4 от capacity
+    // и capacity больше минимального размера
+    if (st->size > 0 && st->size <= st->capacity / ARRAY_SHRINK_FACTOR && st->capacity > ARRAY_MIN_CAPACITY)
+    {
+        size_t new_capacity = st->capacity / ARRAY_GROWTH_FACTOR;
+        void* new_data = realloc(st->data, new_capacity * st->element_size);
+        if (new_data)
+        {
+            st->data     = new_data;
+            st->capacity = new_capacity;
+        }
+    }
+
+    return STACK_OK;
 }
 
 Stack* array_stack_dtr(Stack* st)

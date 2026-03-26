@@ -3,6 +3,13 @@
 
 #include <stddef.h>
 
+// cтатусы выполнения операций
+typedef enum 
+{
+    STACK_OK    = 1,
+    STACK_ERROR = 0
+} StackStatus;
+
 typedef struct Stack 
 {
     void* data;

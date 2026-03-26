@@ -26,17 +26,17 @@ Stack* list_stack_ctr(size_t size, size_t element_size)
 
 int list_stack_push(Stack* st, void* buffer)
 {
-    if (!st || !buffer) return 0;
+    if (!st || !buffer) return STACK_ERROR;
     
     ListStack* lst = (ListStack*)st;
     Node* new_node = (Node*)calloc(1, sizeof(Node));
-    if (!new_node) return 0;
+    if (!new_node) return STACK_ERROR;
     
     new_node->data = calloc(1, st->element_size);
     if (!new_node->data)
     {
         free(new_node);
-        return 0;
+        return STACK_ERROR;
     }
     
     memcpy(new_node->data, buffer, st->element_size);
@@ -44,21 +44,21 @@ int list_stack_push(Stack* st, void* buffer)
     lst->head = new_node;
     
     st->size++;
-    return 1;
+    return STACK_OK;
 }
 
 int list_stack_top(Stack* st, void* buffer)
 {
-    if (!st || !buffer || st->size == 0) return 0;
+    if (!st || !buffer || st->size == 0) return STACK_ERROR;
     
     ListStack* lst = (ListStack*)st;
     memcpy(buffer, lst->head->data, st->element_size);
-    return 1;
+    return STACK_OK;
 }
 
 int list_stack_pop(Stack* st)
 {
-    if (!st || st->size == 0) return 0;
+    if (!st || st->size == 0) return STACK_ERROR;
     
     ListStack* lst = (ListStack*)st;
     Node* temp = lst->head;
@@ -68,7 +68,7 @@ int list_stack_pop(Stack* st)
     free(temp);
     
     st->size--;
-    return 1;
+    return STACK_OK;
 }
 
 Stack* list_stack_dtr(Stack* st)

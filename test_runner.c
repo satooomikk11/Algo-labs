@@ -12,7 +12,15 @@ const int HUNDRED_THOUSAND = 100000;
 const int TEN_THOUSAND     = 10000;
 const int QUARTER_MILLION  = 250000;
 
-// замер времени
+#define TESTS       \
+    ADD(test_test1) \
+    ADD(test_test2) \
+    ADD(test_test3) \
+    ADD(test_test4)
+
+#define CTEST_IMPLEMENTATION
+#include "ctest.h"
+
 double get_time()
 {
     clock_t ticks = clock();
@@ -125,7 +133,8 @@ void run_test3(Stack* (*create_stack)(size_t, size_t), const char* name)
 
     assert(create_stack != NULL);
     
-    for (int iter = 0; iter < ITERATIONS; iter++) {
+    for (int iter = 0; iter < ITERATIONS; iter++)
+    {
         Stack* st = create_stack(MILLION, sizeof(int));
         if (!st) return;
         
@@ -175,7 +184,7 @@ void run_test4()
     {        
         // тест стека на массиве
         double array_time = 0;
-        for (int iter = 0; iter < 3; iter++)
+        for (int iter = 0; iter < ITERATIONS; iter++)
         {
             Stack* arr_st = array_stack_ctr(1000, sizeof(int));
             if (!arr_st) continue;
@@ -194,7 +203,7 @@ void run_test4()
         
         // тест стека на списке
         double list_time = 0;
-        for (int iter = 0; iter < 3; iter++)
+        for (int iter = 0; iter < ITERATIONS; iter++)
         {
             Stack* list_st = list_stack_ctr(0, sizeof(int));
             if (!list_st) continue;
@@ -211,34 +220,37 @@ void run_test4()
             list_st->dtr(list_st);
         }
         
-        fprintf(data_file, "%d %.6f %.6f\n", n, array_time/3, list_time/3);
+        fprintf(data_file, "%d %.6f %.6f\n", n, array_time/ITERATIONS, list_time/ITERATIONS);
     }
     
     fclose(data_file);
 }
 
-int main()
-{
-    srand(time(NULL));
-    
-    printf("\nТЕСТЫ:\n");
-
+TEST(test_test1,
     printf("\nТест 1:\n");
     run_test1(array_stack_ctr, "Стек на массиве");
     run_test1(list_stack_ctr,  "Стек на списке ");
-    
+    ASSERT(1);
+)
+
+TEST(test_test2,
     printf("\nТест 2:\n");
     run_test2(array_stack_ctr, "Стек на массиве");
     run_test2(list_stack_ctr,  "Стек на списке ");
-    
+    ASSERT(1);
+)
+
+TEST(test_test3,
     printf("\nТест 3:\n");
     run_test3(array_stack_ctr, "Стек на массиве");
     run_test3(list_stack_ctr,  "Стек на списке ");
-    
+    ASSERT(1);
+)
+
+TEST(test_test4,
     printf("\nТест 4:\n");
     run_test4();
-    
-    printf("\nТесты завершены!!!\n\n");
-    
-    return 0;
-}
+    ASSERT(1);
+)
+
+RUN_TESTS();
