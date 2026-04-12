@@ -149,29 +149,46 @@ def plot_perfect_hash():
     try:
         df = pd.read_csv('results/tables/perfect_hash_results.csv')
         
-        plt.figure(figsize=(10, 6))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
         
         colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
         table_labels = ['Chaining', 'Quadratic', 'Cuckoo', 'Perfect hashing']
         table_keys = ['chaining', 'quadratic', 'cuckoo', 'perfect_hashing']
         
+        build_times = []
         search_times = []
+        
         for key in table_keys:
             row = df[df['table_type'] == key]
             if not row.empty:
+                build_times.append(row['build_ms'].values[0])
                 search_times.append(row['search_ms'].values[0])
             else:
+                build_times.append(0)
                 search_times.append(0)
         
-        bars = plt.bar(table_labels, search_times, color=colors)
-        plt.xlabel('Hash table type')
-        plt.ylabel('Search time (ms)')
-        plt.title('Search Time Comparison')
-        plt.xticks(rotation=45)
+        # Build time 
+        bars1 = ax1.bar(table_labels, build_times, color=colors)
+        ax1.set_xlabel('Hash table type')
+        ax1.set_ylabel('Build time (ms)')
+        ax1.set_title('Build Time')
+        ax1.tick_params(axis='x', rotation=45)
         
-        for bar, val in zip(bars, search_times):
+        for bar, val in zip(bars1, build_times):
             if val > 0:
-                plt.text(bar.get_x() + bar.get_width()/2, val + 5, 
+                ax1.text(bar.get_x() + bar.get_width()/2, val + 100, 
+                        str(val), ha='center', va='bottom', fontsize=9)
+        
+        # Search time
+        bars2 = ax2.bar(table_labels, search_times, color=colors)
+        ax2.set_xlabel('Hash table type')
+        ax2.set_ylabel('Search time (ms)')
+        ax2.set_title('Search Time')
+        ax2.tick_params(axis='x', rotation=45)
+        
+        for bar, val in zip(bars2, search_times):
+            if val > 0:
+                ax2.text(bar.get_x() + bar.get_width()/2, val + 5, 
                         str(val), ha='center', va='bottom', fontsize=9)
         
         plt.tight_layout()
