@@ -134,33 +134,36 @@ static Node* binomial_heap_fix_heap(Node* head)
     
     while (next)
     {
-        if (curr->degree != next->degree ||
-            (next->sibling && next->sibling->degree == curr->degree))
+        if (curr->degree != next->degree)
+        {
+            break;
+        }
+        
+        if (next->sibling && next->sibling->degree == curr->degree)
         {
             prev = curr;
             curr = next;
             next = curr->sibling;
+            continue;
+        }
+        
+        if (curr->key <= next->key)
+        {
+            curr->sibling = next->sibling;
+            curr = binomial_heap_merge_trees(curr, next);
         }
         else
         {
-            if (curr->key <= next->key)
+            if (prev)
             {
-                curr->sibling = next->sibling;
-                curr = binomial_heap_merge_trees(curr, next);
+                prev->sibling = next;
             }
             else
             {
-                if (prev)
-                {
-                    prev->sibling = next;
-                }
-                else
-                {
-                    head = next;
-                }
-                next = binomial_heap_merge_trees(next, curr);
-                curr = next;
+                head = next;
             }
+            next = binomial_heap_merge_trees(next, curr);
+            curr = next;
         }
         next = curr->sibling;
     }
