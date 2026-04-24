@@ -68,7 +68,7 @@ def plot_binary_heap_results(sizes, linear_times, insertions_times):
 def plot_binomial_heap_results(sizes, times):
     plt.figure(figsize=(10, 6))
     
-    plt.plot(sizes, times, 'm-', linewidth=2, label='Экспериментальные данные')
+    plt.plot(sizes, times, 'm-', linewidth=2, label='Биномиальная куча')
     
     if len(sizes) > 1:
         z = np.polyfit(sizes, times, 1)
@@ -76,9 +76,15 @@ def plot_binomial_heap_results(sizes, times):
         plt.plot(sizes, p(sizes), '--', color='orange', linewidth=2, 
                 label=f'Линейная аппроксимация: {z[0]:.2f}·n + {z[1]:.0f}', alpha=0.7)
     
+    # Запускаем бинарную кучу и добавляем на график
+    bin_sizes, linear_times, insertions_times = run_binary_heap_test()
+    if bin_sizes and linear_times:
+        plt.plot(bin_sizes, linear_times, 'g-', linewidth=2, label='Бинарная куча (линейный)')
+        plt.plot(bin_sizes, insertions_times, 'c-', linewidth=2, label='Бинарная куча (вставки)')
+    
     plt.xlabel('Размер кучи (количество элементов)', fontsize=12)
     plt.ylabel('Время выполнения (микросекунды)', fontsize=12)
-    plt.title('Построение биномиальной кучи вставками', fontsize=14)
+    plt.title('Построение куч вставками', fontsize=14)
     plt.legend(fontsize=10)
     plt.grid(True, alpha=0.3)
     
@@ -94,7 +100,7 @@ def main():
     else:
         print("Не удалось получить результаты")
     
-    # Биномиальная куча
+    # Биномиальная куча с добавлением бинарной
     sizes, times = run_binomial_heap_test()
     if sizes and times:
         plot_binomial_heap_results(sizes, times)

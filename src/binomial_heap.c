@@ -118,6 +118,56 @@ static Node* binomial_heap_union_heaps(Node* head1, Node* head2)
     return new_head;
 }
 
+static Node* binomial_heap_insert_root(Node* head, Node* node)
+{
+    node->sibling = head;
+    return node;
+}
+
+static Node* binomial_heap_fix_heap(Node* head)
+{
+    if (!head) return NULL;
+    
+    Node* prev = NULL;
+    Node* curr = head;
+    Node* next = curr->sibling;
+    
+    while (next)
+    {
+        if (curr->degree != next->degree ||
+            (next->sibling && next->sibling->degree == curr->degree))
+        {
+            prev = curr;
+            curr = next;
+            next = curr->sibling;
+        }
+        else
+        {
+            if (curr->key <= next->key)
+            {
+                curr->sibling = next->sibling;
+                curr = binomial_heap_merge_trees(curr, next);
+            }
+            else
+            {
+                if (prev)
+                {
+                    prev->sibling = next;
+                }
+                else
+                {
+                    head = next;
+                }
+                next = binomial_heap_merge_trees(next, curr);
+                curr = next;
+            }
+        }
+        next = curr->sibling;
+    }
+    
+    return head;
+}
+
 void binomial_heap_init(BinomialHeap* heap)
 {
     assert(heap != NULL);
@@ -132,8 +182,8 @@ Status binomial_heap_insert(BinomialHeap* heap, int key)
     Node* node = binomial_heap_create_node(key);
     if (!node) return ERROR;
     
-    heap->head = binomial_heap_union_heaps(heap->head, node);
-    assert(heap->head != NULL);
+    heap->head = binomial_heap_insert_root(heap->head, node);
+    heap->head = binomial_heap_fix_heap   (heap->head);
     
     return OK;
 }
