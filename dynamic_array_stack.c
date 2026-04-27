@@ -8,6 +8,18 @@ const int ARRAY_GROWTH_FACTOR = 2;
 const int ARRAY_SHRINK_FACTOR = 4;
 const int ARRAY_MIN_CAPACITY  = 1000;
 
+static void array_stack_resize(Stack* st, size_t new_capacity)
+{
+    if (!st || new_capacity == 0) return;
+    
+    void* new_data = realloc(st->data, new_capacity * st->element_size);
+    if (new_data)
+    {
+        st->data = new_data;
+        st->capacity = new_capacity;
+    }
+}
+
 Stack* array_stack_ctr(size_t size, size_t element_size)
 {
     Stack* st = (Stack*)calloc(1, sizeof(Stack));
@@ -45,11 +57,8 @@ int array_stack_push(Stack* st, void* buffer)
         size_t new_capacity = st->capacity * ARRAY_GROWTH_FACTOR;
         if (new_capacity < st->capacity) return STACK_ERROR; // переполнение
 
-        void* new_data = realloc(st->data, new_capacity * st->element_size);
-        if (!new_data) return STACK_ERROR;
-        
-        st->data = new_data;
-        st->capacity = new_capacity;
+        array_stack_resize(st, new_capacity);
+        if (st->size >= st->capacity) return STACK_ERROR; // проверка, что resize удался
     }
     
     // копируем новый элемент в конец массива
@@ -77,12 +86,7 @@ int array_stack_pop(Stack* st)
     if (st->size > 0 && st->size <= st->capacity / ARRAY_SHRINK_FACTOR && st->capacity > ARRAY_MIN_CAPACITY)
     {
         size_t new_capacity = st->capacity / ARRAY_GROWTH_FACTOR;
-        void* new_data = realloc(st->data, new_capacity * st->element_size);
-        if (new_data)
-        {
-            st->data     = new_data;
-            st->capacity = new_capacity;
-        }
+        array_stack_resize(st, new_capacity);
     }
 
     return STACK_OK;
