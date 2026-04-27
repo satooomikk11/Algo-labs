@@ -8,6 +8,8 @@
 #include <string.h>
 #include <time.h>
 
+#define CTEST_TIME_BUFFER_SIZE 9  // для формата HH:MM:SS + null terminator
+
 #define CTEST_GRY "\e[0;37m"
 #define CTEST_GRYB "\e[1;37m"
 #define CTEST_RED "\e[1;31m"
@@ -118,7 +120,7 @@ static char *ctest__get_timestamp() {
   time_t rawtime;
   struct tm *timeinfo;
 
-  char *buffer = (char *)malloc(9 * sizeof(char)); // HH:MM:SS + null terminator
+  char *buffer = (char *)malloc(CTEST_TIME_BUFFER_SIZE * sizeof(char)); // HH:MM:SS + null terminator
   if (buffer == NULL) {
     fprintf(stderr, "ERROR: Could not allocate memory for timestamp!\n");
     exit(1);
@@ -126,7 +128,7 @@ static char *ctest__get_timestamp() {
 
   time(&rawtime);
   timeinfo = localtime(&rawtime);
-  strftime(buffer, 9, "%H:%M:%S", timeinfo);
+  strftime(buffer, CTEST_TIME_BUFFER_SIZE, "%H:%M:%S", timeinfo);
 
   return buffer;
 }
