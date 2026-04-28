@@ -1,6 +1,16 @@
 #!/bin/bash
 
-gcc -o test_runner test_runner.c dynamic_array_stack.c linked_list_stack.c -lm
+if [ ! -f "ctest.h" ]; then
+    echo "Скачивание ctest.h..."
+    wget -q https://raw.githubusercontent.com/AineeJames/ctest.h/main/ctest.h
+    if [ $? -ne 0 ]; then
+        echo "Ошибка скачивания ctest.h!"
+        exit 1
+    fi
+    echo "ctest.h скачан"
+fi
+
+make
 
 if [ $? -ne 0 ]; then
     echo "Ошибка компиляции!"
@@ -16,3 +26,5 @@ python3 plot_results.py
 echo -e "\nРезультаты сохранены:"
 echo "test4_data.txt (данные для графика)"
 echo "stack_comparison.png (сам график)"
+
+make clean

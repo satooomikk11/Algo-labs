@@ -28,25 +28,19 @@ double get_time()
 }
 
 // начальный размер 1000000, удаляем половину, добавляем четверть от исходного (9 итераций)
-void run_test1(Stack* (*create_stack)(size_t, size_t), const char* name)
+int run_test1(Stack* (*create_stack)(size_t, size_t), const char* name)
 {
     double total_time = 0;
     
-    assert(create_stack != NULL);
-
     for (int iter = 0; iter < ITERATIONS; iter++)
     {
         Stack* st = create_stack(MILLION, sizeof(int));
-        if (!st)
-        {
-            printf("Ошибка создания стека\n");
-            return;
-        }
+        if (!st) return STACK_ERROR;
         
         int value = 666;
         for (int i = 0; i < MILLION; i++)
         {
-            st->push(st, &value);
+            if (st->push(st, &value) != STACK_OK) return STACK_ERROR;
         }
         
         double start = get_time();
@@ -56,12 +50,12 @@ void run_test1(Stack* (*create_stack)(size_t, size_t), const char* name)
             int to_remove = st->size / 2;
             for (int i = 0; i < to_remove; i++)
             {
-                st->pop(st);
+                if (st->pop(st) != STACK_OK) return STACK_ERROR;
             }
             
             for (int i = 0; i < QUARTER_MILLION; i++)
             {
-                st->push(st, &value);
+                if (st->push(st, &value) != STACK_OK) return STACK_ERROR;
             }
         }
         
@@ -72,24 +66,23 @@ void run_test1(Stack* (*create_stack)(size_t, size_t), const char* name)
     }
     
     printf("%s: %.6f секунд\n", name, total_time / ITERATIONS);
+    return STACK_OK;
 }
 
 // 100 раз удалить, добавить 10000, потом 9 итераций, потом снова 100 раз
-void run_test2(Stack* (*create_stack)(size_t, size_t), const char* name)
+int run_test2(Stack* (*create_stack)(size_t, size_t), const char* name)
 {
     double total_time = 0;
 
-    assert(create_stack != NULL);
-    
     for (int iter = 0; iter < ITERATIONS; iter++)
     {
         Stack* st = create_stack(MILLION, sizeof(int));
-        if (!st) return;
+        if (!st) return STACK_ERROR;
         
         int value = 666;
         for (int i = 0; i < MILLION; i++)
         {
-            st->push(st, &value);
+            if (st->push(st, &value) != STACK_OK) return STACK_ERROR;
         }
         
         double start = get_time();
@@ -97,24 +90,41 @@ void run_test2(Stack* (*create_stack)(size_t, size_t), const char* name)
         // 100 циклов удаления 10000 и добавления 10000
         for (int cycle = 0; cycle < 100; cycle++)
         {
-            for (int i = 0; i < TEN_THOUSAND; i++) st->pop(st);
-            for (int i = 0; i < TEN_THOUSAND; i++) st->push(st, &value);
+            for (int i = 0; i < TEN_THOUSAND; i++)
+            {
+                if (st->pop(st) != STACK_OK) return STACK_ERROR;
+            }
+            for (int i = 0; i < TEN_THOUSAND; i++)
+            {
+                if (st->push(st, &value) != STACK_OK) return STACK_ERROR;
+            }
         }
         
         // 9 итераций удаления половины и добавления четверти
         for (int iteration = 0; iteration < 9; iteration++)
         {
             int to_remove = st->size / 2;
-            for (int i = 0; i < to_remove; i++) st->pop(st);
-        
-            for (int i = 0; i < QUARTER_MILLION; i++) st->push(st, &value);
+            for (int i = 0; i < to_remove; i++)
+            {
+                if (st->pop(st) != STACK_OK) return STACK_ERROR;
+            }
+            for (int i = 0; i < QUARTER_MILLION; i++)
+            {
+                if (st->push(st, &value) != STACK_OK) return STACK_ERROR;
+            }
         }
         
         // 100 циклов удаления 10000 и добавления 10000
         for (int cycle = 0; cycle < 100; cycle++)
         {
-            for (int i = 0; i < TEN_THOUSAND; i++) st->pop(st);
-            for (int i = 0; i < TEN_THOUSAND; i++) st->push(st, &value);
+            for (int i = 0; i < TEN_THOUSAND; i++)
+            {
+                if (st->pop(st) != STACK_OK) return STACK_ERROR;
+            }
+            for (int i = 0; i < TEN_THOUSAND; i++)
+            {
+                if (st->push(st, &value) != STACK_OK) return STACK_ERROR;
+            }
         }
         
         double end = get_time();
@@ -124,24 +134,23 @@ void run_test2(Stack* (*create_stack)(size_t, size_t), const char* name)
     }
     
     printf("%s: %.6f секунд\n", name, total_time / ITERATIONS);
+    return STACK_OK;
 }
 
 // довести до 1000000, затем 1000000 случайных операций (1 - push, 2 - pop)
-void run_test3(Stack* (*create_stack)(size_t, size_t), const char* name)
+int run_test3(Stack* (*create_stack)(size_t, size_t), const char* name)
 {
     double total_time = 0;
 
-    assert(create_stack != NULL);
-    
     for (int iter = 0; iter < ITERATIONS; iter++)
     {
         Stack* st = create_stack(MILLION, sizeof(int));
-        if (!st) return;
+        if (!st) return STACK_ERROR;
         
         int value = 666;
         for (int i = 0; i < MILLION; i++)
         {
-            st->push(st, &value);
+            if (st->push(st, &value) != STACK_OK) return STACK_ERROR;
         }
         
         double start = get_time();
@@ -152,13 +161,13 @@ void run_test3(Stack* (*create_stack)(size_t, size_t), const char* name)
             int op = rand() % 2 + 1; // 1 или 2
             if (op == 1)
             {
-                st->push(st, &value);
+                if (st->push(st, &value) != STACK_OK) return STACK_ERROR;
             }
             else
             {
                 if (st->size > 0)
                 {
-                    st->pop(st);
+                    if (st->pop(st) != STACK_OK) return STACK_ERROR;
                 }
             }
         }
@@ -170,13 +179,14 @@ void run_test3(Stack* (*create_stack)(size_t, size_t), const char* name)
     }
     
     printf("%s: %.6f секунд\n", name, total_time / ITERATIONS);
+    return STACK_OK;
 }
 
 // измерение времени вставки от 1000 до 1000000 элементов с шагом 1000
-void run_test4()
+int run_test4()
 {
     FILE* data_file = fopen("test4_data.txt", "w");
-    if (!data_file) return;
+    if (!data_file) return STACK_ERROR;
     
     fprintf(data_file, "n array list\n");
     
@@ -187,13 +197,13 @@ void run_test4()
         for (int iter = 0; iter < ITERATIONS; iter++)
         {
             Stack* arr_st = array_stack_ctr(1000, sizeof(int));
-            if (!arr_st) continue;
+            if (!arr_st) return STACK_ERROR;
             
             int value = 666;
             double start = get_time();
             for (int i = 0; i < n; i++)
             {
-                arr_st->push(arr_st, &value);
+                if (arr_st->push(arr_st, &value) != STACK_OK) return STACK_ERROR;
             }
             double end = get_time();
             array_time += (end - start);
@@ -206,13 +216,13 @@ void run_test4()
         for (int iter = 0; iter < ITERATIONS; iter++)
         {
             Stack* list_st = list_stack_ctr(0, sizeof(int));
-            if (!list_st) continue;
+            if (!list_st) return STACK_ERROR;
             
             int value = 666;
             double start = get_time();
             for (int i = 0; i < n; i++)
             {
-                list_st->push(list_st, &value);
+                if (list_st->push(list_st, &value) != STACK_OK) return STACK_ERROR;
             }
             double end = get_time();
             list_time += (end - start);
@@ -224,33 +234,30 @@ void run_test4()
     }
     
     fclose(data_file);
+    return STACK_OK;
 }
 
 TEST(test_test1,
     printf("\nТест 1:\n");
-    run_test1(array_stack_ctr, "Стек на массиве");
-    run_test1(list_stack_ctr,  "Стек на списке ");
-    ASSERT(1);
+    ASSERT_EQ(run_test1(array_stack_ctr, "Стек на массиве"), STACK_OK);
+    ASSERT_EQ(run_test1(list_stack_ctr,  "Стек на списке"),  STACK_OK);
 )
 
 TEST(test_test2,
     printf("\nТест 2:\n");
-    run_test2(array_stack_ctr, "Стек на массиве");
-    run_test2(list_stack_ctr,  "Стек на списке ");
-    ASSERT(1);
+    ASSERT_EQ(run_test2(array_stack_ctr, "Стек на массиве"), STACK_OK);
+    ASSERT_EQ(run_test2(list_stack_ctr,  "Стек на списке"),  STACK_OK);
 )
 
 TEST(test_test3,
     printf("\nТест 3:\n");
-    run_test3(array_stack_ctr, "Стек на массиве");
-    run_test3(list_stack_ctr,  "Стек на списке ");
-    ASSERT(1);
+    ASSERT_EQ(run_test3(array_stack_ctr, "Стек на массиве"), STACK_OK);
+    ASSERT_EQ(run_test3(list_stack_ctr,  "Стек на списке"),  STACK_OK);
 )
 
 TEST(test_test4,
     printf("\nТест 4:\n");
-    run_test4();
-    ASSERT(1);
+    ASSERT_EQ(run_test4(), STACK_OK);
 )
 
 RUN_TESTS();
