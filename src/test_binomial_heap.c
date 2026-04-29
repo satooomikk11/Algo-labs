@@ -21,14 +21,14 @@ long long measure_binomial_build_time(int n)
     }
     
     BinomialHeap heap;
-    binomial_heap_init(&heap);
+    binomial_heap_init(&heap, sizeof(int));
     
     clock_t start = clock();
     
     Status status = OK;
     for (int i = 0; i < n; i++)
     {
-        if (binomial_heap_insert(&heap, values[i]) != OK)
+        if (binomial_heap_insert(&heap, &values[i]) != OK)
         {
             status = ERROR;
             break;

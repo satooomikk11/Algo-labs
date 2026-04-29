@@ -1,21 +1,21 @@
 #include "binary_heap.h"
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
+#include "assert_all.h"
 
 static void swap(long long arr[], int i, int j)
 {
-    assert(arr != NULL);
-    assert(i >= 0 && j >= 0);
+    ASSERT_ALL(arr != NULL, i >= 0 && j >= 0);
 
     long long tmp = arr[i];
-                    arr[i] = arr[j];
-                             arr[j] = tmp;
+    arr[i] = arr[j];
+    arr[j] = tmp;
 }
 
 static void sift_up(long long arr[], int idx)
 {
-    assert(arr != NULL);
-    assert(idx >= 0);
+        ASSERT_ALL(arr != NULL, idx >= 0);
 
     while (idx > 0)
     {
@@ -34,9 +34,7 @@ static void sift_up(long long arr[], int idx)
 
 static void sift_down(long long arr[], int size, int idx)
 {
-    assert(arr  != NULL);
-    assert(size >= 0);
-    assert(idx  >= 0 && idx < size);
+    ASSERT_ALL(arr != NULL, size >= 0, idx >= 0 && idx < size);
 
     while (1)
     {
@@ -83,17 +81,12 @@ Status binary_heap_insert(BinaryHeap* heap, long long x)
     return OK;
 }
 
-void binary_heap_linear(BinaryHeap* heap, long long values[], int n)
+void binary_heap_linear(BinaryHeap* heap, long long values[], size_t n)
 {
-    assert(heap   != NULL);
-    assert(values != NULL);
-    assert(n > 0 && n <= MAX_HEAP_SIZE);
+    ASSERT_ALL(heap != NULL, values != NULL, n > 0, n <= MAX_HEAP_SIZE);
 
     heap->size = n;
-    for (int i = 0; i < n; i++)
-    {
-        heap->data[i] = values[i];
-    }
+    memcpy(heap->data, values, n * sizeof(long long));
     
     for (int i = n / 2 - 1; i >= 0; i--)
     {
@@ -101,28 +94,26 @@ void binary_heap_linear(BinaryHeap* heap, long long values[], int n)
     }
 }
 
-void binary_heap_insertions(BinaryHeap* heap, long long values[], int n)
+void binary_heap_insertions(BinaryHeap* heap, long long values[], size_t n)
 {
-    assert(heap   != NULL);
-    assert(values != NULL);
-    assert(n > 0 && n <= MAX_HEAP_SIZE);
+    ASSERT_ALL(heap != NULL, values != NULL, n > 0, n <= MAX_HEAP_SIZE);
 
     binary_heap_init(heap);
     
-    for (int i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     {
         binary_heap_insert(heap, values[i]);
     }
 }
 
-Status binary_heap_is_valid(BinaryHeap* heap)
+Status binary_heap_is_valid(const BinaryHeap* heap)
 {
     assert(heap != NULL);
 
-    for (int i = 0; i < heap->size; i++)
+    for (size_t i = 0; i < heap->size; i++)
     {
-        int left  = 2 * i + 1;
-        int right = 2 * i + 2;
+        size_t left  = 2 * i + 1;
+        size_t right = 2 * i + 2;
         
         if (left  < heap->size && heap->data[left]  < heap->data[i])
             return ERROR;
