@@ -15,11 +15,21 @@ static unsigned int hash2(int key, int size)
 CuckooHashTable* cuckoo_create(int initial_size, float threshold)
 {
     CuckooHashTable* ht = (CuckooHashTable*)calloc(1, sizeof(CuckooHashTable));
+    if (!ht) return NULL;
+    
     ht->size  = initial_size;
     ht->count = 0;
     ht->load_factor_threshold = threshold;
     ht->table1 = (int*)calloc(initial_size, sizeof(int));
     ht->table2 = (int*)calloc(initial_size, sizeof(int));
+
+    if (!ht->table1 || !ht->table2)
+    {
+        free(ht->table1);
+        free(ht->table2);
+        free(ht);
+        return NULL;
+    }
     
     for (int i = 0; i < initial_size; i++)
     {
@@ -31,6 +41,8 @@ CuckooHashTable* cuckoo_create(int initial_size, float threshold)
 
 static void cuckoo_rehash(CuckooHashTable* ht)
 {
+    if (!ht) return;
+    
     int  old_size   = ht->size;
     int* old_table1 = ht->table1;
     int* old_table2 = ht->table2;
@@ -39,6 +51,14 @@ static void cuckoo_rehash(CuckooHashTable* ht)
     ht->count  = 0;
     ht->table1 = (int*)calloc(ht->size, sizeof(int));
     ht->table2 = (int*)calloc(ht->size, sizeof(int));
+    
+    if (!ht->table1 || !ht->table2)
+    {
+        ht->table1 = old_table1;
+        ht->table2 = old_table2;
+        ht->size   = old_size;
+        return;
+    }
     
     for (int i = 0; i < ht->size; i++)
     {
@@ -58,6 +78,8 @@ static void cuckoo_rehash(CuckooHashTable* ht)
 
 void cuckoo_insert(CuckooHashTable* ht, int key)
 {
+    if (!ht) return;
+    
     if ((float)ht->count / (2 * ht->size) >= ht->load_factor_threshold)
     {
         cuckoo_rehash(ht);
@@ -93,7 +115,7 @@ void cuckoo_insert(CuckooHashTable* ht, int key)
         
         evicted = ht->table2[pos2];
                   ht->table2[pos2] = tmp_key;
-                                     tmp_key =  evicted;
+                                     tmp_key = evicted;
         
         loop_count++;
     }
@@ -104,6 +126,8 @@ void cuckoo_insert(CuckooHashTable* ht, int key)
 
 int cuckoo_search(CuckooHashTable* ht, int key)
 {
+    if (!ht) return 0;
+    
     unsigned int pos1 = hash1(key, ht->size);
     if (ht->table1[pos1] == key) return 1;
     
@@ -115,6 +139,8 @@ int cuckoo_search(CuckooHashTable* ht, int key)
 
 int cuckoo_delete(CuckooHashTable* ht, int key)
 {
+    if (!ht) return 0;
+    
     unsigned int pos1 = hash1(key, ht->size);
     if (ht->table1[pos1] == key)
     {
@@ -135,6 +161,8 @@ int cuckoo_delete(CuckooHashTable* ht, int key)
 
 void cuckoo_destroy(CuckooHashTable* ht)
 {
+    if (!ht) return;
+    
     free(ht->table1);
     free(ht->table2);
     free(ht);

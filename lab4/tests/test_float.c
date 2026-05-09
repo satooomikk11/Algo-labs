@@ -29,7 +29,13 @@ void test_float_hashes()
         return;
     }
     
-    float* keys = calloc(N,   sizeof(float));
+    float* keys = calloc(N, sizeof(float));
+    if (!keys)
+    {
+        fclose(f);
+        return;
+    }
+
     size_t read = fread(keys, sizeof(unsigned int), N, f);
     (void)read; // подавление warning
     fclose(f);

@@ -20,7 +20,13 @@ void test_hash_tables_load_factor()
         return;
     }
     
-    int* keys   = calloc(N,   sizeof(int));
+    int* keys = calloc(N, sizeof(int));
+    if (!keys)
+    {
+        fclose(f);
+        return;
+    }
+
     size_t read = fread(keys, sizeof(int), N, f);
     (void)read;
     fclose(f);

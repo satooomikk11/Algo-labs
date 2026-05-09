@@ -30,6 +30,12 @@ void test_uint_hashes()
     }
     
     unsigned int* keys = calloc(N, sizeof(unsigned int));
+    if (!keys)
+    {
+        fclose(f);
+        return;
+    }
+    
     size_t read = fread(keys, sizeof(unsigned int), N, f);
     (void)read; // подавление warning
     fclose(f);

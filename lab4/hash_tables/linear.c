@@ -9,16 +9,29 @@ static unsigned int hash_int(int key, int size)
 LinearHashTable* linear_create(int initial_size, float threshold)
 {
     LinearHashTable* ht = (LinearHashTable*)calloc(1, sizeof(LinearHashTable));
+    if (!ht) return NULL;
+    
     ht->size  = initial_size;
     ht->count = 0;
     ht->load_factor_threshold = threshold;
     ht->keys   = (int*)calloc(initial_size, sizeof(int));
     ht->status = (int*)calloc(initial_size, sizeof(int));
+    
+    if (!ht->keys || !ht->status)
+    {
+        free(ht->keys);
+        free(ht->status);
+        free(ht);
+        return NULL;
+    }
+    
     return ht;
 }
 
 static void linear_rehash(LinearHashTable* ht)
 {
+    if (!ht) return;
+    
     int  old_size   = ht->size;
     int* old_keys   = ht->keys;
     int* old_status = ht->status;
@@ -26,11 +39,20 @@ static void linear_rehash(LinearHashTable* ht)
     ht->size  *= 2;
     ht->keys   = (int*)calloc(ht->size, sizeof(int));
     ht->status = (int*)calloc(ht->size, sizeof(int));
-    ht->count  = 0;
+    
+    if (!ht->keys || !ht->status)
+    {
+        ht->keys   = old_keys;
+        ht->status = old_status;
+        ht->size   = old_size;
+        return;
+    }
+    
+    ht->count = 0;
     
     for (int i = 0; i < old_size; i++)
     {
-        if (old_status[i] == 1) linear_insert(ht, old_keys[i]);
+        if (old_status[i] == CELL_OCCUPIED) linear_insert(ht, old_keys[i]);
     }
     free(old_keys);
     free(old_status);
@@ -38,6 +60,8 @@ static void linear_rehash(LinearHashTable* ht)
 
 void linear_insert(LinearHashTable* ht, int key)
 {
+    if (!ht) return;
+    
     if ((float)ht->count / ht->size >= ht->load_factor_threshold)
     {
         linear_rehash(ht);
@@ -46,7 +70,7 @@ void linear_insert(LinearHashTable* ht, int key)
     unsigned int index = hash_int(key, ht->size);
     int i = 0;
     
-    while (ht->status[(index + i) % ht->size] == 1)
+    while (ht->status[(index + i) % ht->size] == CELL_OCCUPIED)
     {
         if (ht->keys[(index + i) % ht->size] == key) return;
         i++;
@@ -54,20 +78,22 @@ void linear_insert(LinearHashTable* ht, int key)
     
     int pos = (index + i) % ht->size;
     ht->keys[pos]   = key;
-    ht->status[pos] = 1;
+    ht->status[pos] = CELL_OCCUPIED;
     ht->count++;
 }
 
 int linear_search(LinearHashTable* ht, int key)
 {
+    if (!ht) return 0;
+    
     unsigned int index = hash_int(key, ht->size);
     int i = 0;
     
     while (i < ht->size)
     {
         int pos = (index + i) % ht->size;
-        if (ht->status[pos] == 0) return 0;
-        if (ht->status[pos] == 1 && ht->keys[pos] == key) return 1;
+        if (ht->status[pos] == CELL_EMPTY) return 0;
+        if (ht->status[pos] == CELL_OCCUPIED && ht->keys[pos] == key) return 1;
         i++;
     }
     return 0;
@@ -75,16 +101,18 @@ int linear_search(LinearHashTable* ht, int key)
 
 int linear_delete(LinearHashTable* ht, int key)
 {
+    if (!ht) return 0;
+    
     unsigned int index = hash_int(key, ht->size);
     int i = 0;
     
     while (i < ht->size)
     {
         int pos = (index + i) % ht->size;
-        if (ht->status[pos] == 0) return 0;
-        if (ht->status[pos] == 1 && ht->keys[pos] == key)
+        if (ht->status[pos] == CELL_EMPTY) return 0;
+        if (ht->status[pos] == CELL_OCCUPIED && ht->keys[pos] == key)
         {
-            ht->status[pos] = -1;
+            ht->status[pos] = CELL_DELETED;
             ht->count--;
             return 1;
         }
@@ -95,6 +123,8 @@ int linear_delete(LinearHashTable* ht, int key)
 
 void linear_destroy(LinearHashTable* ht)
 {
+    if (!ht) return;
+    
     free(ht->keys);
     free(ht->status);
     free(ht);

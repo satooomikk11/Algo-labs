@@ -15,6 +15,8 @@ void test_perfect_hashing()
     const int N_SEARCH = 10000000;
     
     int* keys = calloc (N_KEYS, sizeof(int));
+    if (!keys) return;
+
     for (int i = 0; i < N_KEYS; i++) keys[i] = rand();
     
     FILE* out = fopen("results/tables/perfect_hash_results.csv", "w");

@@ -10,10 +10,18 @@ static unsigned int hash_int(int key, int size)
 ChainingHashTable* chaining_create(int initial_size, float threshold)
 {
     ChainingHashTable* ht = (ChainingHashTable*)calloc(1, sizeof(ChainingHashTable));
+    if (!ht) return NULL;
+
     ht->size  = initial_size;
     ht->count = 0;
     ht->load_factor_threshold = threshold;
     ht->buckets = (ChainingNode**)calloc(initial_size, sizeof(ChainingNode*));
+    if (!ht->buckets)
+    {
+        free(ht);
+        return NULL;
+    }
+    
     return ht;
 }
 
@@ -24,6 +32,13 @@ static void chaining_rehash(ChainingHashTable* ht)
     
     ht->size   *= 2;
     ht->buckets = (ChainingNode**)calloc(ht->size, sizeof(ChainingNode*));
+    if (!ht->buckets)
+    {
+        ht->size    = old_size;
+        ht->buckets = old_buckets;
+        return;
+    }
+
     ht->count   = 0;
     
     for (int i = 0; i < old_size; i++)
@@ -42,6 +57,8 @@ static void chaining_rehash(ChainingHashTable* ht)
 
 void chaining_insert(ChainingHashTable* ht, int key)
 {
+    if (!ht) return;
+
     if ((float)ht->count / ht->size >= ht->load_factor_threshold)
     {
         chaining_rehash(ht);
@@ -57,6 +74,8 @@ void chaining_insert(ChainingHashTable* ht, int key)
     }
     
     ChainingNode* new_node = (ChainingNode*)calloc(1, sizeof(ChainingNode));
+    if (!new_node) return;
+
     new_node->key  = key;
     new_node->next = ht->buckets[index];
     ht->buckets[index] = new_node;

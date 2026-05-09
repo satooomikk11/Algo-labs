@@ -16,25 +16,12 @@ data/
 
 results/
 *.csv
-!results/.gitkeep
 
 .vscode/
 .idea/
 *.swp
-*.swo
 *~
 .DS_Store
-Thumbs.db
 
 __pycache__/
 *.pyc
-*.pyo
-.pytest_cache/
-
-*.bak
-*.backup
-*.orig
-*.rej
-
-core.*
-*.core

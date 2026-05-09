@@ -14,6 +14,8 @@
 
 static double test_table(void *table, int size, int* ops, int* keys_op, int type)
 {
+    if (!ops || !keys_op) return 0;
+    
     double total_time = 0;
     int repeats = 1;
     
@@ -29,6 +31,8 @@ static double test_table(void *table, int size, int* ops, int* keys_op, int type
         if (type == 0)
         {
             ChainingHashTable* ht = chaining_create(1000, 0.7);
+            if (!ht) continue;
+            
             start = clock();
             for (int i = 0; i < size; i++)
             {
@@ -43,6 +47,8 @@ static double test_table(void *table, int size, int* ops, int* keys_op, int type
         else if (type == 1)
         {
             LinearHashTable* ht = linear_create(1000, 0.7);
+            if (!ht) continue;
+            
             start = clock();
             for (int i = 0; i < size; i++)
             {
@@ -57,6 +63,8 @@ static double test_table(void *table, int size, int* ops, int* keys_op, int type
         else if (type == 2)
         {
             QuadraticHashTable* ht = quadratic_create(1000, 0.7);
+            if (!ht) continue;
+            
             start = clock();
             for (int i = 0; i < size; i++)
             {
@@ -71,6 +79,8 @@ static double test_table(void *table, int size, int* ops, int* keys_op, int type
         else if (type == 3)
         {
             DoubleHashTable* ht = double_create(1000, 0.7);
+            if (!ht) continue;
+            
             start = clock();
             for (int i = 0; i < size; i++)
             {
@@ -85,6 +95,8 @@ static double test_table(void *table, int size, int* ops, int* keys_op, int type
         else if (type == 4)
         {
             CuckooHashTable* ht = cuckoo_create(2000, 0.5);
+            if (!ht) continue;
+            
             start = clock();
             for (int i = 0; i < size; i++)
             {
@@ -107,7 +119,9 @@ void test_hash_tables_operations()
     srand(42);
     
     int num_sizes = (MAX_SIZE - MIN_SIZE) / STEP + 1;
-    int* sizes = calloc(num_sizes, sizeof(int));
+    int* sizes = (int*)calloc(num_sizes, sizeof(int));
+    if (!sizes) return;
+    
     for (int i = 0; i < num_sizes; i++)
     {
         sizes[i] = MIN_SIZE + i * STEP;
@@ -116,14 +130,27 @@ void test_hash_tables_operations()
     float probs[] = {0.5, 0.25, 0.25};
     
     FILE* out = fopen("results/tables/operations_results.csv", "w");
+    if (!out)
+    {
+        free(sizes);
+        return;
+    }
     fprintf(out, "size,chaining,linear,quadratic,double,cuckoo\n");
     
     for (int s_idx = 0; s_idx < num_sizes; s_idx++)
     {
         int size = sizes[s_idx];
         
-        int* ops     = calloc(size, sizeof(int));
-        int* keys_op = calloc(size, sizeof(int));
+        int* ops     = (int*)calloc(size, sizeof(int));
+        int* keys_op = (int*)calloc(size, sizeof(int));
+        
+        if (!ops || !keys_op)
+        {
+            free(ops);
+            free(keys_op);
+            continue;
+        }
+        
         for (int i = 0; i < size; i++)
         {
             double r = rand() / (double)RAND_MAX;
@@ -172,7 +199,9 @@ void test_hash_tables_operations_uniform()
     srand(42);
     
     int num_sizes = (MAX_SIZE - MIN_SIZE) / STEP + 1;
-    int* sizes    = calloc(num_sizes, sizeof(int));
+    int* sizes = (int*)calloc(num_sizes, sizeof(int));
+    if (!sizes) return;
+    
     for (int i = 0; i < num_sizes; i++)
     {
         sizes[i] = MIN_SIZE + i * STEP;
@@ -181,16 +210,29 @@ void test_hash_tables_operations_uniform()
     float probs[] = {0.3333, 0.3333, 0.3334};
     
     FILE* out = fopen("results/tables/operations_uniform_results.csv", "w");
+    if (!out)
+    {
+        free(sizes);
+        return;
+    }
     fprintf(out, "size,chaining,linear,quadratic,double,cuckoo\n");
-    
     
     for (int s_idx = 0; s_idx < num_sizes; s_idx++)
     {
         int size = sizes[s_idx];
         
-        int* ops     = calloc(size, sizeof(int));
-        int* keys_op = calloc(size, sizeof(int));
-        for (int i = 0; i < size; i++) {
+        int* ops     = (int*)calloc(size, sizeof(int));
+        int* keys_op = (int*)calloc(size, sizeof(int));
+        
+        if (!ops || !keys_op)
+        {
+            free(ops);
+            free(keys_op);
+            continue;
+        }
+        
+        for (int i = 0; i < size; i++)
+        {
             double r = rand() / (double)RAND_MAX;
             if      (r < probs[0])            ops[i] = 0;
             else if (r < probs[0] + probs[1]) ops[i] = 1;

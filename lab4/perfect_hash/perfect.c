@@ -16,6 +16,8 @@ static int find_perfect_hash(int* keys, int count, int* a, int* b, int* size)
         *size = count * count;
         
         int* temp = (int*)calloc(*size, sizeof(int));
+        if (!temp) continue;
+        
         for (int i = 0; i < *size; i++) temp[i] = -1;
         
         int ok = 1;
@@ -37,10 +39,22 @@ static int find_perfect_hash(int* keys, int count, int* a, int* b, int* size)
 
 PerfectHashTable* perfect_create(int* keys, int count)
 {
+    if (!keys || count <= 0) return NULL;
+    
     PerfectHashTable* ht = (PerfectHashTable*)calloc(1, sizeof(PerfectHashTable));
+    if (!ht) return NULL;
+    
     ht->size = count;
     ht->hash_params = (int*)calloc(2 * count, sizeof(int));
     ht->table = (PerfectSecondary*)calloc(count, sizeof(PerfectSecondary));
+    
+    if (!ht->hash_params || !ht->table)
+    {
+        free(ht->hash_params);
+        free(ht->table);
+        free(ht);
+        return NULL;
+    }
     
     for (int i = 0; i < count; i++)
     {
@@ -49,6 +63,11 @@ PerfectHashTable* perfect_create(int* keys, int count)
     }
     
     int* first_level = (int*)calloc(count, sizeof(int));
+    if (!first_level)
+    {
+        perfect_destroy(ht);
+        return NULL;
+    }
     
     for (int i = 0; i < count; i++)
     {
@@ -61,6 +80,8 @@ PerfectHashTable* perfect_create(int* keys, int count)
         if (first_level[i] > 0)
         {
             int* bucket_keys = (int*)calloc(first_level[i], sizeof(int));
+            if (!bucket_keys) continue;
+            
             int idx = 0;
             for (int j = 0; j < count; j++)
             {
@@ -73,6 +94,13 @@ PerfectHashTable* perfect_create(int* keys, int count)
             {
                 ht->table[i].size = size;
                 ht->table[i].keys = (int*)calloc(size, sizeof(int));
+                
+                if (!ht->table[i].keys)
+                {
+                    free(bucket_keys);
+                    continue;
+                }
+                
                 for (int j = 0; j < size; j++) ht->table[i].keys[j] = -1;
                 
                 for (int j = 0; j < first_level[i]; j++)
@@ -93,18 +121,24 @@ PerfectHashTable* perfect_create(int* keys, int count)
 
 int perfect_search(PerfectHashTable* ht, int key)
 {
+    if (!ht) return 0;
+    
     unsigned int h1 = hash_int(key, 100, 50, ht->size);
-    if (ht->table[h1].size == 0) return 0;
+    if (h1 >= (unsigned int)ht->size || ht->table[h1].size == 0) return 0;
     
     int a = ht->hash_params[2*h1];
     int b = ht->hash_params[2*h1 + 1];
     unsigned int h2 = hash_int(key, a, b, ht->table[h1].size);
+    
+    if (h2 >= (unsigned int)ht->table[h1].size) return 0;
     
     return (ht->table[h1].keys[h2] == key);
 }
 
 void perfect_destroy(PerfectHashTable* ht)
 {
+    if (!ht) return;
+    
     for (int i = 0; i < ht->size; i++)
     {
         if (ht->table[i].keys) free(ht->table[i].keys);

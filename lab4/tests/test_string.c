@@ -36,6 +36,12 @@ void test_string_hashes()
     }
     
     char** strings = calloc(N, sizeof(char*));
+    if (!strings)
+    {
+        fclose(f);
+        return;
+    }
+    
     char buffer[100];
     for (int i = 0; i < N; i++)
     {
