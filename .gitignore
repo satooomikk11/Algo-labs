@@ -1,0 +1,13 @@
+# Собранные файлы
+build/
+*.o
+*.exe
+*.out
+*.app
+
+# Файлы IDE 
+.vscode/
+.idea/
+*.code-workspace
+*.sublime-*
+
