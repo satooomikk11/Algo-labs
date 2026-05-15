@@ -36,28 +36,30 @@ static void merge_sort_rec(int* arr, int* temp, size_t left, size_t right)
     merge(arr, temp, left, mid, right);
 }
 
-void merge_sort_recursive(int* arr, size_t n)
+void merge_sort_recursive(int* arr, size_t size)
 {
-    if (n <= 1) return;
+    if (size <= 1) return;
     
-    int* temp = calloc(n, sizeof(int));
-    merge_sort_rec(arr, temp, 0, n - 1);
+    int* temp = calloc(size, sizeof(int));
+    if (!temp) return;
+    merge_sort_rec(arr, temp, 0, size - 1);
     free(temp);
 }
 
-void merge_sort_iterative(int* arr, size_t n)
+void merge_sort_iterative(int* arr, size_t size)
 {
-    if (n <= 1) return;
+    if (size <= 1) return;
     
-    int* temp = calloc(n, sizeof(int));
+    int* temp = calloc(size, sizeof(int));
+    if (!temp) return;
     
-    for (size_t width = 1; width < n; width *= 2)
+    for (size_t width = 1; width < size; width *= 2)
     {
-        for (size_t i = 0; i < n; i += 2 * width)
+        for (size_t i = 0; i < size; i += 2 * width)
         {
-            size_t left  = i;
-            size_t mid   = (i + width - 1     < n - 1) ? i + width - 1     : n - 1;
-            size_t right = (i + 2 * width - 1 < n - 1) ? i + 2 * width - 1 : n - 1;
+            size_t left  =  i;
+            size_t mid   = (i + width - 1     < size - 1) ? i + width - 1     : size - 1;
+            size_t right = (i + 2 * width - 1 < size - 1) ? i + 2 * width - 1 : size - 1;
             
             if (mid < right)
             {

@@ -2,6 +2,10 @@ CC = gcc
 CFLAGS = -Wall -Wextra -O2 -Iinclude
 LDFLAGS = -lm
 
+VENV_DIR = venv
+PYTHON = $(VENV_DIR)/bin/python3
+PIP = $(VENV_DIR)/bin/pip
+
 SRCS = src/tester.c                        \
        src/sorting_utils.c                 \
        src/testing.c                       \
@@ -17,7 +21,7 @@ SRCS = src/tester.c                        \
        src/sortings/introspective.c        \
        src/sortings/radix_sort.c
 
-all: generator qsort_check tester
+all: generator qsort_check tester 
 
 generator: src/generator.c
 	$(CC) $(CFLAGS) -o $@ $^
@@ -28,9 +32,17 @@ qsort_check: src/qsort_check.c
 tester: $(SRCS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
+$(VENV_DIR):
+	python3 -m venv $(VENV_DIR)
+	$(PIP) install matplotlib numpy
+
 clean:
 	rm -f generator qsort_check tester
 	rm -rf results/*.csv
+	rm -rf $(VENV_DIR)
+
+clean_all: clean
+	rm -rf small_tests big_tests test_most_dublicates
 
 test: all
 	mkdir -p results small_tests big_tests test_most_dublicates
@@ -38,7 +50,11 @@ test: all
 	./scripts/generate.sh
 	./tester
 
-plot:
-	python3 scripts/plot_graphs.py
+# запуск тестирования без генерации тестов
+run: tester
+	./tester
 
-.PHONY: all clean test plot
+plot: $(VENV_DIR)
+	$(PYTHON) scripts/plot_graphs.py
+
+.PHONY: all clean clean_all test run plot all_test

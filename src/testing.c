@@ -29,6 +29,8 @@ static int* read_array_from_file(const char* filename, size_t* size)
     }
     
     int* arr = calloc(n, sizeof(int));
+    if (!arr) return 0;
+    
     for (size_t i = 0; i < n; i++)
     {
         if (fscanf(file, "%d", &arr[i]) != 1)
@@ -73,6 +75,13 @@ static int test_single_case(const char* test_dir,
     }
     
     int* arr_copy = calloc(n, sizeof(int));
+    if (!arr_copy)
+    {
+        free(arr);
+        free(expected);
+        return 0;
+    }
+
     copy_array(arr_copy, arr, n);
     
     double start_time = get_time_ms();

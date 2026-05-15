@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <time.h>
 
+static inline void swap(int* a, int* b)
+{
+    int temp = *a;
+               *a = *b;
+                    *b = temp;
+}
+
 static size_t partition_hoare(int* arr, size_t low, size_t high, int pivot)
 {
     size_t i = low  - 1;
@@ -14,9 +21,7 @@ static size_t partition_hoare(int* arr, size_t low, size_t high, int pivot)
         
         if (i >= j) return j;
         
-        int temp = arr[i];
-                   arr[i] = arr[j];
-                            arr[j] = temp;
+        swap(&arr[i], &arr[j]);
     }
 }
 
@@ -41,24 +46,9 @@ static int median_of_three(int* arr, size_t low, size_t high)
 {
     size_t mid = low + (high - low) / 2;
     
-    if (arr[low] > arr[mid])
-    {
-        int temp = arr[low];
-                   arr[low] = arr[mid];
-                              arr[mid] = temp;
-    }
-    if (arr[low] > arr[high])
-    {
-        int temp = arr[low];
-        arr[low] = arr[high];
-        arr[high] = temp;
-    }
-    if (arr[mid] > arr[high])
-    {
-        int temp = arr[mid];
-                   arr[mid] = arr[high];
-                              arr[high] = temp;
-    }
+    if (arr[low] > arr[mid])  { swap(&arr[low], &arr[mid]);  }
+    if (arr[low] > arr[high]) { swap(&arr[low], &arr[high]); }
+    if (arr[mid] > arr[high]) { swap(&arr[mid], &arr[high]); }
     
     return arr[mid];
 }

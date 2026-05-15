@@ -3,18 +3,19 @@
 
 int cmp(const void* a, const void* b)
 {
-    return *(int*)a - *(int*)b;
+    return (*(int*)a > *(int*)b) - (*(int*)a < *(int*)b);
 }
 
 int main()
 {
     size_t n = 0;
-    scanf("%zu", &n);
+    if (scanf("%zu", &n) != 1) return 1;
     
     int* arr = calloc(n, sizeof(int));
+    if (!arr) return 1;
     for (size_t i = 0; i < n; i++)
     {
-        scanf("%d", &arr[i]);
+        if (scanf("%d", &arr[i]) != 1) return 1;
     }
     
     qsort(arr, n, sizeof(int), cmp);

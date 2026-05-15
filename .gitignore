@@ -1,5 +1,9 @@
 # Скомпилированные файлы
+generator
+qsort_check
+tester
 *.o
+*.exe
 build/
 
 # Папки с тестами и результатами
@@ -12,8 +16,13 @@ results/
 *.out
 *.in
 *.csv
+*.log
 
-# Python
+# Виртуальное окружение Python
+venv/
+env/
+.env/
+venv*/
 __pycache__/
 *.pyc
 
@@ -21,3 +30,7 @@ __pycache__/
 .vscode/
 .idea/
 *.swp
+*.swo
+
+lab1/
+lab3/

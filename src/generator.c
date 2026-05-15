@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
+
+#define PID_SHIFT_BITS 16
 
 int main(int argc, char* argv[])
 {
@@ -13,7 +16,7 @@ int main(int argc, char* argv[])
     size_t size = atoi(argv[1]);
     int max_val = atoi(argv[2]);
     
-    srand(time(NULL));
+    srand(time(NULL) ^ (getpid() << PID_SHIFT_BITS));
     
     printf("%zu\n", size);
     for (size_t i = 0; i < size; i++)

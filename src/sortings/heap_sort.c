@@ -1,10 +1,10 @@
 #include "sortings/heap_sort.h"
 
-void bottom_up_heapify(int arr[], int n, int i, int k)
+void bottom_up_heapify(int arr[], size_t n, size_t i, int k)
 {
     while (1)
     {
-        int first_child = i * k + 1;
+        size_t first_child = i * k + 1;
         if (first_child >= n)
         {
             break;
@@ -35,7 +35,7 @@ void bottom_up_heapify(int arr[], int n, int i, int k)
     }
 }
 
-void build_k_heap(int arr[], int n, int k)
+void build_k_heap(int arr[], size_t n, int k)
 {
     for (int i = (n - 1) / k; i >= 0; i--)
     {
@@ -43,7 +43,7 @@ void build_k_heap(int arr[], int n, int k)
     }
 }
 
-void heap_sort_k(int arr[], int n, int k)
+void heap_sort_k(int arr[], size_t n, int k)
 {
     if (n <= 1) return;
     
