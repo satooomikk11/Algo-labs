@@ -7,12 +7,19 @@
 #define SEED 42
 #define TIME_MEASURE_ERROR -1LL
 
+int int_compare(const void* a, const void* b)
+{
+    int ia = *(int*)a;
+    int ib = *(int*)b;
+    return ia - ib;
+}
+
 long long measure_binomial_build_time(int n)
 {
     assert(n > 0);
 
     int* values = (int*)calloc(n, sizeof(int));
-    assert(values != NULL);
+    if (!values) return TIME_MEASURE_ERROR;
     
     srand(SEED);
     for (int i = 0; i < n; i++)
@@ -21,23 +28,22 @@ long long measure_binomial_build_time(int n)
     }
     
     BinomialHeap heap;
-    binomial_heap_init(&heap, sizeof(int));
+    binomial_heap_init(&heap, sizeof(int), int_compare);
     
     clock_t start = clock();
     
-    Status status = OK;
     for (int i = 0; i < n; i++)
     {
-        if (binomial_heap_insert(&heap, &values[i]) != OK)
+        Status status = binomial_heap_insert(&heap, &values[i]);
+        if (status != OK)
         {
-            status = ERROR;
-            break;
+            binomial_heap_clear(&heap);
+            free(values);
+            return TIME_MEASURE_ERROR;
         }
     }
     
     clock_t end = clock();
-    
-    assert(status == OK);
     
     long long time_us = (end - start) * 1000000LL / CLOCKS_PER_SEC;
     

@@ -12,7 +12,7 @@ long long measure_linear_build(int n)
     assert(n > 0 && n <= MAX_HEAP_SIZE);
 
     long long* values = (long long*)calloc(n, sizeof(long long));
-    assert(values != NULL);
+    if (!values) return TIME_MEASURE_ERROR;
     
     srand(SEED);
     for (int i = 0; i < n; i++)
@@ -39,7 +39,7 @@ long long measure_insertions_build(int n)
     assert(n > 0 && n <= MAX_HEAP_SIZE);
 
     long long* values = (long long*)calloc(n, sizeof(long long));
-    assert(values != NULL);
+    if (!values) return TIME_MEASURE_ERROR;
     
     srand(SEED);
     for (int i = 0; i < n; i++)

@@ -9,9 +9,10 @@ typedef enum
     ERROR = -1
 } Status;
 
+typedef int (*CompareFunc)(const void* a, const void* b);
+
 typedef struct Node
 {
-    int key;
     int degree;
     struct Node* parent;
     struct Node* child;
@@ -23,9 +24,10 @@ typedef struct
 {
     Node* head;
     size_t data_size;
+    CompareFunc compare;
 } BinomialHeap;
 
-void   binomial_heap_init  (BinomialHeap* heap, size_t data_size);
+void   binomial_heap_init  (BinomialHeap* heap, size_t data_size, CompareFunc compare);
 Status binomial_heap_insert(BinomialHeap* heap, const void* key);
 void   binomial_heap_clear (BinomialHeap* heap);
 
