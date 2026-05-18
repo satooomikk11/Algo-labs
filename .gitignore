@@ -1,0 +1,16 @@
+test_binary_heap
+test_binomial_heap
+*.o
+*.exe
+*.out
+
+*.tmp
+
+.vscode/
+.idea/
+*.user
+*.suo
+
+__pycache__/
+*.pyc
+*.pyo
