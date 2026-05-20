@@ -3,81 +3,81 @@
 #include <string.h>
 #include <assert.h>
 
-SegmentTree* segtree_create(int n)
+SegmentTree* segtree_create(int array_size)
 {
-    assert(n > 0);
+    assert(array_size > 0);
     
-    SegmentTree* st = (SegmentTree*)calloc(1, sizeof(SegmentTree));
-    if (!st) return NULL;
+    SegmentTree* segment_tree = (SegmentTree*)calloc(1, sizeof(SegmentTree));
+    if (!segment_tree) return NULL;
     
-    st->n = n;
-    st->size = 1;
-    while (st->size < n) st->size <<= 1;
+    segment_tree->array_size = array_size;
+    segment_tree->tree_size = 1;
+    while (segment_tree->tree_size < array_size) segment_tree->tree_size <<= 1;
     
-    st->tree = (long long*)calloc(2 * st->size, sizeof(long long));
-    if (!st->tree)
+    segment_tree->tree_array = (long long*)calloc(2 * segment_tree->tree_size, sizeof(long long));
+    if (!segment_tree->tree_array)
     {
-        free(st);
+        free(segment_tree);
         return NULL;
     }
     
-    return st;
+    return segment_tree;
 }
 
-void segtree_build(SegmentTree* st, long long* a, int n)
+void segtree_build(SegmentTree* segment_tree, long long* source_array, int array_size)
 {
-    assert(st && a && n > 0 && st->n == n);
+    assert(segment_tree && source_array && array_size > 0 && segment_tree->array_size == array_size);
     
-    for (int i = 0; i < n; i++)
+    for (int index = 0; index < array_size; index++)
     {
-        st->tree[st->size + i] = a[i];
+        segment_tree->tree_array[segment_tree->tree_size + index] = source_array[index];
     }
 
-    for (int i = st->size - 1; i > 0; i--)
+    for (int index = segment_tree->tree_size - 1; index > 0; index--)
     {
-        st->tree[i] = st->tree[2 * i] + st->tree[2 * i + 1];
-    }
-}
-
-void segtree_update(SegmentTree* st, int idx, long long value)
-{
-    assert(st && idx >= 0 && idx < st->n);
-    
-    int pos = st->size + idx;
-    st->tree[pos] = value;
-    pos >>= 1;
-    
-    while (pos >= 1)
-    {
-        st->tree[pos] = st->tree[2 * pos] + st->tree[2 * pos + 1];
-        pos >>= 1;
+        segment_tree->tree_array[index] = segment_tree->tree_array[2 * index] + segment_tree->tree_array[2 * index + 1];
     }
 }
 
-static long long segtree_query_rec(SegmentTree* st, int node, int node_l, int node_r, int q_l, int q_r)
+void segtree_update(SegmentTree* segment_tree, int index, long long value)
 {
-    if (node_r < q_l || node_l > q_r) return 0;
+    assert(segment_tree && index >= 0 && index < segment_tree->array_size);
     
-    if (q_l <= node_l && node_r <= q_r) return st->tree[node];
+    int position = segment_tree->tree_size + index;
+    segment_tree->tree_array[position] = value;
+    position >>= 1;
     
-    int mid = (node_l + node_r) / 2;
-    long long left_sum  = segtree_query_rec(st, 2 * node, node_l, mid, q_l, q_r);
-    long long right_sum = segtree_query_rec(st, 2 * node + 1, mid + 1, node_r, q_l, q_r);
+    while (position >= 1)
+    {
+        segment_tree->tree_array[position] = segment_tree->tree_array[2 * position] + segment_tree->tree_array[2 * position + 1];
+        position >>= 1;
+    }
+}
+
+static long long segtree_query_rec(SegmentTree* segment_tree, int node_index, int node_left, int node_right, int query_left, int query_right)
+{
+    if (node_right < query_left || node_left > query_right) return 0;
+    
+    if (query_left <= node_left && node_right <= query_right) return segment_tree->tree_array[node_index];
+    
+    int mid = (node_left + node_right) / 2;
+    long long left_sum  = segtree_query_rec(segment_tree, 2 * node_index, node_left, mid, query_left, query_right);
+    long long right_sum = segtree_query_rec(segment_tree, 2 * node_index + 1, mid + 1, node_right, query_left, query_right);
     return left_sum + right_sum;
 }
 
-long long segtree_query(SegmentTree* st, int l, int r)
+long long segtree_query(SegmentTree* segment_tree, int left_bound, int right_bound)
 {
-    assert(st && l >= 0 && r >= 0 && l <= r && r < st->n);
+    assert(segment_tree && left_bound >= 0 && right_bound >= 0 && left_bound <= right_bound && right_bound < segment_tree->array_size);
     
-    return segtree_query_rec(st, 1, 0, st->size - 1, l, r);
+    return segtree_query_rec(segment_tree, 1, 0, segment_tree->tree_size - 1, left_bound, right_bound);
 }
 
-void segtree_free(SegmentTree* st)
+void segtree_free(SegmentTree* segment_tree)
 {
-    if (st)
+    if (segment_tree)
     {
-        if (st->tree) free(st->tree);
-        free(st);
+        if (segment_tree->tree_array) free(segment_tree->tree_array);
+        free(segment_tree);
     }
 }

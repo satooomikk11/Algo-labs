@@ -3,170 +3,182 @@
 #include <math.h>
 #include <assert.h>
 
-static long long min_ll(long long a, long long b)
+static long long min_ll(long long first_value, long long second_value)
 {
-    return a < b ? a : b;
+    return first_value < second_value ? first_value : second_value;
 }
 
-static int* precompute_fl_log(int n)
+static int* precompute_fl_log(int max_value)
 {
-    assert(!(n < 0));
+    assert(!(max_value < 0));
     
-    int* fl_log = (int*)calloc((n + 1), sizeof(int));
-    if (!fl_log) return NULL;
+    int* floor_log_array = (int*)calloc((max_value + 1), sizeof(int));
+    if (!floor_log_array) return NULL;
     
-    if (n >= 1)
+    if (max_value >= 1)
     {
-        fl_log[1] = 0;
+        floor_log_array[1] = 0;
     }
 
-    for (int i = 2; i <= n; i++)
+    for (int current_index = 2; current_index <= max_value; current_index++)
     {
-        fl_log[i] = fl_log[i / 2] + 1;
+        floor_log_array[current_index] = floor_log_array[current_index / 2] + 1;
     }
 
-    return fl_log;
+    return floor_log_array;
 }
 
-SparseTable* st_create_v1(long long* a, int n)
+SparseTable* st_create_v1(long long* source_array, int array_size)
 {
-    assert(a && n > 0);
+    assert(source_array && array_size > 0);
     
-    SparseTable* st = (SparseTable*)calloc(1, sizeof(SparseTable));
-    if (!st) return NULL;
+    SparseTable* sparse_table = (SparseTable*)calloc(1, sizeof(SparseTable));
+    if (!sparse_table) return NULL;
     
-    st->variant = 1;
-    st->n = n;
-    st->logn   = (int)(log2(n)) + 1;
-    st->fl_log = precompute_fl_log(n);
-    if (!st->fl_log)
+    sparse_table->storage_variant = 1;
+    sparse_table->array_size = array_size;
+    sparse_table->log_size   = (int)(log2(array_size)) + 1;
+    sparse_table->floor_log_cache = precompute_fl_log(array_size);
+    if (!sparse_table->floor_log_cache)
     {
-        free(st);
+        free(sparse_table);
         return NULL;
     }
     
-    st->st = (long long**)calloc(n, sizeof(long long*));
-    if (!st->st)
+    sparse_table->table_data = (long long**)calloc(array_size, sizeof(long long*));
+    if (!sparse_table->table_data)
     {
-        free(st->fl_log);
-        free(st);
+        free(sparse_table->floor_log_cache);
+        free(sparse_table);
         return NULL;
     }
     
-    for (int i = 0; i < n; i++)
+    for (int row_index = 0; row_index < array_size; row_index++)
     {
-        st->st[i] = (long long*)calloc(st->logn, sizeof(long long));
-        if (!st->st[i])
+        sparse_table->table_data[row_index] = (long long*)calloc(sparse_table->log_size, sizeof(long long));
+        if (!sparse_table->table_data[row_index])
         {
-            for (int j = 0; j < i; j++) free(st->st[j]);
-            free(st->st);
-            free(st->fl_log);
-            free(st);
+            for (int prev_row = 0; prev_row < row_index; prev_row++) free(sparse_table->table_data[prev_row]);
+            free(sparse_table->table_data);
+            free(sparse_table->floor_log_cache);
+            free(sparse_table);
             return NULL;
         }
-        st->st[i][0] = a[i];
+        sparse_table->table_data[row_index][0] = source_array[row_index];
     }
     
-    for (int k = 1; k < st->logn; k++)
+    for (int power_index = 1; power_index < sparse_table->log_size; power_index++)
     {
-        int step = 1 << (k - 1);
-        for (int i = 0; i + (1 << k) <= n; i++)
+        int step = 1 << (power_index - 1);
+        for (int start_index = 0; start_index + (1 << power_index) <= array_size; start_index++)
         {
-            st->st[i][k] = min_ll(st->st[i][k - 1], st->st[i + step][k - 1]);
+            sparse_table->table_data[start_index][power_index] = min_ll(
+                sparse_table->table_data[start_index][power_index - 1], 
+                sparse_table->table_data[start_index + step][power_index - 1]
+            );
         }
     }
     
-    return st;
+    return sparse_table;
 }
 
-SparseTable* st_create_v2(long long* a, int n)
+SparseTable* st_create_v2(long long* source_array, int array_size)
 {
-    assert(a && n > 0);
+    assert(source_array && array_size > 0);
     
-    SparseTable* st = (SparseTable*)calloc(1, sizeof(SparseTable));
-    if (!st) return NULL;
+    SparseTable* sparse_table = (SparseTable*)calloc(1, sizeof(SparseTable));
+    if (!sparse_table) return NULL;
     
-    st->variant = 2;
-    st->n = n;
-    st->logn = (int)(log2(n)) + 1;
-    st->fl_log = precompute_fl_log(n);
-    if (!st->fl_log)
+    sparse_table->storage_variant = 2;
+    sparse_table->array_size = array_size;
+    sparse_table->log_size = (int)(log2(array_size)) + 1;
+    sparse_table->floor_log_cache = precompute_fl_log(array_size);
+    if (!sparse_table->floor_log_cache)
     {
-        free(st);
+        free(sparse_table);
         return NULL;
     }
     
-    st->st = (long long**)calloc(st->logn, sizeof(long long*));
-    if (!st->st)
+    sparse_table->table_data = (long long**)calloc(sparse_table->log_size, sizeof(long long*));
+    if (!sparse_table->table_data)
     {
-        free(st->fl_log);
-        free(st);
+        free(sparse_table->floor_log_cache);
+        free(sparse_table);
         return NULL;
     }
     
-    for (int k = 0; k < st->logn; k++)
+    for (int power_index = 0; power_index < sparse_table->log_size; power_index++)
     {
-        st->st[k] = (long long*)calloc(n, sizeof(long long));
-        if (!st->st[k])
+        sparse_table->table_data[power_index] = (long long*)calloc(array_size, sizeof(long long));
+        if (!sparse_table->table_data[power_index])
         {
-            for (int j = 0; j < k; j++) free(st->st[j]);
-            free(st->st);
-            free(st->fl_log);
-            free(st);
+            for (int prev_power = 0; prev_power < power_index; prev_power++) free(sparse_table->table_data[prev_power]);
+            free(sparse_table->table_data);
+            free(sparse_table->floor_log_cache);
+            free(sparse_table);
             return NULL;
         }
     }
     
-    for (int i = 0; i < n; i++)
+    for (int element_index = 0; element_index < array_size; element_index++)
     {
-        st->st[0][i] = a[i];
+        sparse_table->table_data[0][element_index] = source_array[element_index];
     }
 
-    for (int k = 1; k < st->logn; k++)
+    for (int power_index = 1; power_index < sparse_table->log_size; power_index++)
     {
-        int step = 1 << (k - 1);
-        for (int i = 0; i + (1 << k) <= n; i++)
+        int step = 1 << (power_index - 1);
+        for (int start_index = 0; start_index + (1 << power_index) <= array_size; start_index++)
         {
-            st->st[k][i] = min_ll(st->st[k - 1][i], st->st[k - 1][i + step]);
+            sparse_table->table_data[power_index][start_index] = min_ll(
+                sparse_table->table_data[power_index - 1][start_index], 
+                sparse_table->table_data[power_index - 1][start_index + step]
+            );
         }
     }
     
-    return st;
+    return sparse_table;
 }
 
-long long st_query(SparseTable* st, int l, int r)
+long long st_query(SparseTable* sparse_table, int left_bound, int right_bound)
 {
-    assert(st && l >= 0 && r >= 0 && l <= r && r < st->n);
+    assert(sparse_table && left_bound >= 0 && right_bound >= 0 && left_bound <= right_bound && right_bound < sparse_table->array_size);
     
-    int len = r - l + 1;
-    int j = st->fl_log[len];
+    int segment_length = right_bound - left_bound + 1;
+    int power_index = sparse_table->floor_log_cache[segment_length];
     
-    if (st->variant == 1)
-        return min_ll(st->st[l][j], st->st[r - (1 << j) + 1][j]);
+    if (sparse_table->storage_variant == 1)
+        return min_ll(
+            sparse_table->table_data[left_bound][power_index], 
+            sparse_table->table_data[right_bound - (1 << power_index) + 1][power_index]
+        );
     else
-        return min_ll(st->st[j][l], st->st[j][r - (1 << j) + 1]);
+        return min_ll(
+            sparse_table->table_data[power_index][left_bound], 
+            sparse_table->table_data[power_index][right_bound - (1 << power_index) + 1]
+        );
 }
 
-void st_free(SparseTable* st)
+void st_free(SparseTable* sparse_table)
 {
-    if (!st) return;
+    if (!sparse_table) return;
     
-    if (st->variant == 1)
+    if (sparse_table->storage_variant == 1)
     {
-        for (int i = 0; i < st->n; i++)
+        for (int row_index = 0; row_index < sparse_table->array_size; row_index++)
         {
-            if (st->st && st->st[i]) free(st->st[i]);
+            if (sparse_table->table_data && sparse_table->table_data[row_index]) free(sparse_table->table_data[row_index]);
         }
     }
     else
     {
-        for (int k = 0; k < st->logn; k++)
+        for (int power_index = 0; power_index < sparse_table->log_size; power_index++)
         {
-            if (st->st && st->st[k]) free(st->st[k]);
+            if (sparse_table->table_data && sparse_table->table_data[power_index]) free(sparse_table->table_data[power_index]);
         }
     }
     
-    if (st->st)     free(st->st);
-    if (st->fl_log) free(st->fl_log);
-    free(st);
+    if (sparse_table->table_data)     free(sparse_table->table_data);
+    if (sparse_table->floor_log_cache) free(sparse_table->floor_log_cache);
+    free(sparse_table);
 }

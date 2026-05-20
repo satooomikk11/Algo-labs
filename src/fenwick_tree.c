@@ -3,83 +3,84 @@
 #include <assert.h>
 #include <stdio.h>
 
-FenwickTree* fenwick_create(int n)
+FenwickTree* fenwick_create(int array_size)
 {
-    assert(n > 0);
+    assert(array_size > 0);
     
-    FenwickTree* ft = (FenwickTree*)calloc(1, sizeof(FenwickTree));
-    if (ft == NULL) return NULL;
+    FenwickTree* fenwick_tree = (FenwickTree*)calloc(1, sizeof(FenwickTree));
+    if (fenwick_tree == NULL) return NULL;
     
-    ft->n = n;
-    ft->T = (long long*)calloc(n, sizeof(long long));
-    if (!ft->T)
+    fenwick_tree->size = array_size;
+    fenwick_tree->tree_array = (long long*)calloc(array_size, sizeof(long long));
+    if (!fenwick_tree->tree_array)
     {
-        free(ft);
+        free(fenwick_tree);
         return NULL;
     }
     
-    return ft;
+    return fenwick_tree;
 }
 
-void fenwick_build_prefix(FenwickTree* ft, long long* a, int n)
+void fenwick_build_prefix(FenwickTree* fenwick_tree, long long* source_array, int array_size)
 {
-    assert(ft && a && n > 0 && ft->n == n);
+    assert(fenwick_tree && source_array && array_size > 0 && fenwick_tree->size == array_size);
     
-    long long* prefix = (long long*)calloc((n + 1), sizeof(long long));
-    if (!prefix) return;
+    long long* prefix_array = (long long*)calloc((array_size + 1), sizeof(long long));
+    if (!prefix_array) return;
     
-    prefix[0] = 0;
-    for (int i = 0; i < n; i++)
+    prefix_array[0] = 0;
+    for (int index = 0; index < array_size; index++)
     {
-        prefix[i + 1] = prefix[i] + a[i];
+        prefix_array[index + 1] = prefix_array[index] + source_array[index];
     }
     
-    for (int i = 0; i < n; i++)
+    for (int index = 0; index < array_size; index++)
     {
-        int F = i & (i + 1);
-        ft->T[i] = prefix[i + 1] - prefix[F];
+        int func_f_value = index & (index + 1);
+        fenwick_tree->tree_array[index] = prefix_array[index + 1] - prefix_array[func_f_value];
     }
     
-    free(prefix);
+    free(prefix_array);
 }
 
-void fenwick_inc(FenwickTree* ft, int i, long long delta)
+void fenwick_inc(FenwickTree* fenwick_tree, int index, long long delta)
 {
-    assert(ft && (i >= 0 && i < ft->n));
+    assert(fenwick_tree && (index >= 0 && index < fenwick_tree->size));
 
-    while (i < ft->n)
+    while (index < fenwick_tree->size)
     {
-        ft->T[i] += delta;
-        i = i | (i + 1);
+        fenwick_tree->tree_array[index] += delta;
+        index = index | (index + 1);
     }
 }
 
-long long fenwick_sum(FenwickTree* ft, int r)
+long long fenwick_sum(FenwickTree* fenwick_tree, int right_bound)
 {
-    assert(ft && (r >= -1 && r < ft->n));
+    assert(fenwick_tree && (right_bound >= -1 && right_bound < fenwick_tree->size));
     
-    long long result = 0;
-    while (r >= 0)
+    long long result_sum = 0;
+    while (right_bound >= 0)
     {
-        result += ft->T[r];
-        r = (r & (r + 1)) - 1;
+        result_sum += fenwick_tree->tree_array[right_bound];
+        right_bound = (right_bound & (right_bound + 1)) - 1;
     }
-    return result;
+    return result_sum;
 }
 
-long long fenwick_range_sum(FenwickTree* ft, int l, int r)
+long long fenwick_range_sum(FenwickTree* fenwick_tree, int left_bound, int right_bound)
 {
-    assert(ft && (l >= 0 && l < ft->n) && (r >= 0 && r < ft->n) && l <= r);
+    assert(fenwick_tree && (left_bound >= 0 && left_bound < fenwick_tree->size) && 
+           (right_bound >= 0 && right_bound < fenwick_tree->size) && left_bound <= right_bound);
     
-    if (l == 0) return fenwick_sum(ft, r);
-    return fenwick_sum(ft, r) - fenwick_sum(ft, l - 1);
+    if (left_bound == 0) return fenwick_sum(fenwick_tree, right_bound);
+    return fenwick_sum(fenwick_tree, right_bound) - fenwick_sum(fenwick_tree, left_bound - 1);
 }
 
-void fenwick_free(FenwickTree* ft)
+void fenwick_free(FenwickTree* fenwick_tree)
 {
-    if (ft)
+    if (fenwick_tree)
     {
-        if (ft->T) free(ft->T);
-        free(ft);
+        if (fenwick_tree->tree_array) free(fenwick_tree->tree_array);
+        free(fenwick_tree);
     }
 }
