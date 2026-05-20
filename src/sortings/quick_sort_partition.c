@@ -34,10 +34,10 @@ static void quick_sort_lomuto_rec(int* arr, size_t low, size_t high)
     if (pi < high) quick_sort_lomuto_rec(arr, pi + 1, high);
 }
 
-void quick_sort_lomuto(int* arr, size_t n)
+void quick_sort_lomuto(int* arr, size_t size)
 {
-    if (n <= 1) return;
-    quick_sort_lomuto_rec(arr, 0, n - 1);
+    if (size <= 1) return;
+    quick_sort_lomuto_rec(arr, 0, size - 1);
 }
 
 static size_t partition_hoare(int* arr, size_t low, size_t high)
@@ -68,10 +68,10 @@ static void quick_sort_hoare_rec(int* arr, size_t low, size_t high)
     quick_sort_hoare_rec(arr, pi + 1, high);
 }
 
-void quick_sort_hoare(int* arr, size_t n)
+void quick_sort_hoare(int* arr, size_t size)
 {
-    if (n <= 1) return;
-    quick_sort_hoare_rec(arr, 0, n - 1);
+    if (size <= 1) return;
+    quick_sort_hoare_rec(arr, 0, size - 1);
 }
 
 static void partition_3way(int* arr, size_t low, size_t high, size_t* lt, size_t* gt)
@@ -116,8 +116,8 @@ static void quick_sort_3way_rec(int* arr, size_t low, size_t high)
     if (gt < high) quick_sort_3way_rec(arr, gt + 1, high);
 }
 
-void quick_sort_3way(int* arr, size_t n)
+void quick_sort_3way(int* arr, size_t size)
 {
-    if (n <= 1) return;
-    quick_sort_3way_rec(arr, 0, n - 1);
+    if (size <= 1) return;
+    quick_sort_3way_rec(arr, 0, size - 1);
 }

@@ -3,6 +3,6 @@
 
 #include <stddef.h>
 
-void introsort(int* arr, size_t n, int threshold);
+void introsort(int* arr, size_t size, int threshold);
 
 #endif // INTROSORT_H

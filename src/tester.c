@@ -32,9 +32,9 @@ static int g_introspective_threshold;
 static int g_introspective_c;
 
 
-void heap_sort_wrapper(int* arr, size_t n)
+void heap_sort_wrapper(int* arr, size_t size)
 {
-    heap_sort_k(arr, n, g_heap_k);
+    heap_sort_k(arr, size, g_heap_k);
 }
 
 int qsort_cmp(const void* a, const void* b)
@@ -42,19 +42,19 @@ int qsort_cmp(const void* a, const void* b)
     return *(int*)a - *(int*)b;
 }
 
-void qsort_wrapper(int* arr, size_t n)
+void qsort_wrapper(int* arr, size_t size)
 {
-    qsort(arr, n, sizeof(int), qsort_cmp);
+    qsort(arr, size, sizeof(int), qsort_cmp);
 }
 
-void introsort_wrapper(int* arr, size_t n)
+void introsort_wrapper(int* arr, size_t size)
 {
-    introsort(arr, n, g_introsort_threshold);
+    introsort(arr, size, g_introsort_threshold);
 }
 
-void introspective_wrapper(int* arr, size_t n)
+void introspective_wrapper(int* arr, size_t size)
 {
-    introspective_sort(arr, n, g_introspective_depth, g_introspective_threshold);
+    introspective_sort(arr, size, g_introspective_depth, g_introspective_threshold);
 }
 
 int main()

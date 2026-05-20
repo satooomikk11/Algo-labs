@@ -36,10 +36,10 @@ static void quick_sort_central_rec(int* arr, size_t low, size_t high)
     quick_sort_central_rec(arr, pi + 1, high);
 }
 
-void quick_sort_central(int* arr, size_t n)
+void quick_sort_central(int* arr, size_t size)
 {
-    if (n <= 1) return;
-    quick_sort_central_rec(arr, 0, n - 1);
+    if (size <= 1) return;
+    quick_sort_central_rec(arr, 0, size - 1);
 }
 
 static int median_of_three(int* arr, size_t low, size_t high)
@@ -64,10 +64,10 @@ static void quick_sort_median3_rec(int* arr, size_t low, size_t high)
     quick_sort_median3_rec(arr, pi + 1, high);
 }
 
-void quick_sort_median3(int* arr, size_t n)
+void quick_sort_median3(int* arr, size_t size)
 {
-    if (n <= 1) return;
-    quick_sort_median3_rec(arr, 0, n - 1);
+    if (size <= 1) return;
+    quick_sort_median3_rec(arr, 0, size - 1);
 }
 
 static int random_pivot(int* arr, size_t low, size_t high)
@@ -94,10 +94,10 @@ static void quick_sort_random_rec(int* arr, size_t low, size_t high)
     quick_sort_random_rec(arr, pi + 1, high);
 }
 
-void quick_sort_random(int* arr, size_t n)
+void quick_sort_random(int* arr, size_t size)
 {
-    if (n <= 1) return;
-    quick_sort_random_rec(arr, 0, n - 1);
+    if (size <= 1) return;
+    quick_sort_random_rec(arr, 0, size - 1);
 }
 
 static int median_of_three_random(int* arr, size_t low, size_t high)
@@ -131,8 +131,8 @@ static void quick_sort_median3_random_rec(int* arr, size_t low, size_t high)
     quick_sort_median3_random_rec(arr, pi + 1, high);
 }
 
-void quick_sort_median3_random(int* arr, size_t n)
+void quick_sort_median3_random(int* arr, size_t size)
 {
-    if (n <= 1) return;
-    quick_sort_median3_random_rec(arr, 0, n - 1);
+    if (size <= 1) return;
+    quick_sort_median3_random_rec(arr, 0, size - 1);
 }

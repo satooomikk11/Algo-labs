@@ -1,8 +1,8 @@
 #include "sortings/insertion_sort.h"
 
-void insertion_sort(int* arr, size_t n)
+void insertion_sort(int* arr, size_t size)
 {
-    for (size_t i = 1; i < n; i++)
+    for (size_t i = 1; i < size; i++)
     {
         int key = arr[i];
         size_t j = i;

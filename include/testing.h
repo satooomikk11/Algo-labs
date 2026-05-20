@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-typedef void (*sort_func_t)(int* arr, size_t n);
+typedef void (*sort_func_t)(int* arr, size_t size);
 
 typedef struct
 {

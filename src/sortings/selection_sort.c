@@ -1,16 +1,16 @@
 #include "sortings/selection_sort.h"
 
-void selection_sort(int* arr, size_t n)
+void selection_sort(int* arr, size_t size)
 {
-    if (arr == NULL || n <= 1)
+    if (arr == NULL || size <= 1)
     {
         return;
     }
     
-    for (size_t i = 0; i < n - 1; i++)
+    for (size_t i = 0; i < size - 1; i++)
     {
         size_t min_idx = i;
-        for (size_t j = i + 1; j < n; j++)
+        for (size_t j = i + 1; j < size; j++)
         {
             if (arr[j] < arr[min_idx])
             {

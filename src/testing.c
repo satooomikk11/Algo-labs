@@ -5,6 +5,8 @@
 #include <string.h>
 #include <assert.h>
 
+#define MAX_FILENAME_LEN 512
+
 static int* read_array_from_file(const char* filename, size_t* size)
 {
     FILE* file = fopen(filename, "r");
@@ -13,14 +15,14 @@ static int* read_array_from_file(const char* filename, size_t* size)
         return NULL;
     }
     
-    size_t n = 0;
-    if (fscanf(file, "%zu", &n) != 1)
+    size_t arr_size = 0;
+    if (fscanf(file, "%zu", &arr_size) != 1)
     {
         fclose(file);
         return NULL;
     }
 
-    if (n == 0)
+    if (arr_size  == 0)
     {
         *size = 0;
         fclose(file);
@@ -28,10 +30,10 @@ static int* read_array_from_file(const char* filename, size_t* size)
         return arr;
     }
     
-    int* arr = calloc(n, sizeof(int));
+    int* arr = calloc(arr_size, sizeof(int));
     if (!arr) return 0;
     
-    for (size_t i = 0; i < n; i++)
+    for (size_t i = 0; i < arr_size; i++)
     {
         if (fscanf(file, "%d", &arr[i]) != 1)
         {
@@ -42,7 +44,7 @@ static int* read_array_from_file(const char* filename, size_t* size)
     }
     
     fclose(file);
-    *size = n;
+    *size = arr_size;
     return arr;
 }
 
@@ -52,29 +54,29 @@ static int test_single_case(const char* test_dir,
                             sort_func_t sort_func,
                             double* time_ms)
 {
-    char in_filename [512] = "";
-    char out_filename[512] = "";
+    char in_filename [MAX_FILENAME_LEN] = "";
+    char out_filename[MAX_FILENAME_LEN] = "";
     
     snprintf(in_filename,  sizeof(in_filename),  "%s/%zu_%d.in",  test_dir, size, test_num);
     snprintf(out_filename, sizeof(out_filename), "%s/%zu_%d.out", test_dir, size, test_num);
     
-    size_t n = 0;
-    int* arr = read_array_from_file(in_filename, &n);
+    size_t arr_size = 0;
+    int* arr = read_array_from_file(in_filename, &arr_size);
     if (!arr)
     {
         return 0;
     }
     
-    size_t expected_n = 0;
-    int* expected = read_array_from_file(out_filename, &expected_n);
-    if (!expected || n != expected_n)
+    size_t expected_arr_size = 0;
+    int* expected = read_array_from_file(out_filename, &expected_arr_size);
+    if (!expected || arr_size != expected_arr_size)
     {
         free(arr);
         if (expected) free(expected);
         return 0;
     }
     
-    int* arr_copy = calloc(n, sizeof(int));
+    int* arr_copy = calloc(arr_size, sizeof(int));
     if (!arr_copy)
     {
         free(arr);
@@ -82,24 +84,20 @@ static int test_single_case(const char* test_dir,
         return 0;
     }
 
-    copy_array(arr_copy, arr, n);
+    copy_array(arr_copy, arr, arr_size);
     
     double start_time = get_time_ms();
-    sort_func(arr_copy, n);
+    sort_func(arr_copy, arr_size);
     double end_time = get_time_ms();
     
     *time_ms = end_time - start_time;
     
     // сравниваем с ожидаемым результатом
-    int is_correct = 1;
-    for (size_t i = 0; i < n; i++)
+    for (size_t i = 0; i < arr_size; i++)
     {
         assert(arr_copy[i] == expected[i] && "Element mismatch!");
     }
-    assert(is_sorted(arr_copy, n) && "Array is not sorted!");
-    
-    assert(is_correct && "Sorting function produced incorrect result!");
-    assert(is_sorted(arr_copy, n) && "Array is not sorted!");
+    assert(is_sorted(arr_copy, arr_size) && "Array is not sorted!");
     
     free(arr);
     free(expected);

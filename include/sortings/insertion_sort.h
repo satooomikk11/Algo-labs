@@ -3,6 +3,6 @@
 
 #include <stddef.h>
 
-void insertion_sort(int* arr, size_t n);
+void insertion_sort(int* arr, size_t size);
 
 #endif // INSERTION_SORT_H

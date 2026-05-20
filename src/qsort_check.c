@@ -8,20 +8,20 @@ int cmp(const void* a, const void* b)
 
 int main()
 {
-    size_t n = 0;
-    if (scanf("%zu", &n) != 1) return 1;
+    size_t size = 0;
+    if (scanf("%zu", &size) != 1) return 1;
     
-    int* arr = calloc(n, sizeof(int));
+    int* arr = calloc(size, sizeof(int));
     if (!arr) return 1;
-    for (size_t i = 0; i < n; i++)
+    for (size_t i = 0; i < size; i++)
     {
         if (scanf("%d", &arr[i]) != 1) return 1;
     }
     
-    qsort(arr, n, sizeof(int), cmp);
+    qsort(arr, size, sizeof(int), cmp);
     
-    printf("%zu\n", n);
-    for (size_t i = 0; i < n; i++)
+    printf("%zu\n", size);
+    for (size_t i = 0; i < size; i++)
     {
         printf("%d ", arr[i]);
     }

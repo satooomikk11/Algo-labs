@@ -9,9 +9,9 @@ double get_time_ms()
     return tv.tv_sec * 1000.0 + tv.tv_usec / 1000.0;
 }
 
-int is_sorted(int* arr, size_t n)
+int is_sorted(int* arr, size_t size)
 {
-    for (size_t i = 1; i < n; i++)
+    for (size_t i = 1; i < size; i++)
     {
         if (arr[i] < arr[i-1])
         {
@@ -21,7 +21,7 @@ int is_sorted(int* arr, size_t n)
     return 1;
 }
 
-void copy_array(int* dest, const int* src, size_t n)
+void copy_array(int* dest, const int* src, size_t count)
 {
-    memcpy(dest, src, n * sizeof(int));
+    memcpy(dest, src, count * sizeof(int));
 }

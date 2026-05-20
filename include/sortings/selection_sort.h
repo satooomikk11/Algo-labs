@@ -3,6 +3,6 @@
 
 #include <stddef.h>
 
-void selection_sort(int* arr, size_t n);
+void selection_sort(int* arr, size_t size);
 
 #endif // SELECTION_SORT_H

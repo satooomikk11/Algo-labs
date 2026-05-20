@@ -5,11 +5,11 @@
 
 static void introsort_rec(int* arr, size_t low, size_t high, int threshold)
 {
-    size_t n = high - low + 1;
+    size_t size = high - low + 1;
     
-    if (n <= (size_t)threshold)
+    if (size <= (size_t)threshold)
     {
-        shell_sort(arr + low, n);
+        shell_sort(arr + low, size);
         return;
     }
     
@@ -36,8 +36,8 @@ static void introsort_rec(int* arr, size_t low, size_t high, int threshold)
     }
 }
 
-void introsort(int* arr, size_t n, int threshold)
+void introsort(int* arr, size_t size, int threshold)
 {
-    if (n <= 1) return;
-    introsort_rec(arr, 0, n - 1, threshold);
+    if (size <= 1) return;
+    introsort_rec(arr, 0, size - 1, threshold);
 }

@@ -1,16 +1,16 @@
 #include "sortings/bubble_sort.h"
 
-void bubble_sort(int* arr, size_t n)
+void bubble_sort(int* arr, size_t size)
 {
-    if (arr == NULL || n <= 1)
+    if (arr == NULL || size <= 1)
     {
         return;
     }
 
-    for (size_t i = 0; i < n - 1; i++)
+    for (size_t i = 0; i < size - 1; i++)
     {
         int swapped = 0;
-        for (size_t j = 0; j < n - i - 1; j++)
+        for (size_t j = 0; j < size - i - 1; j++)
         {
             if (arr[j] > arr[j + 1])
             {

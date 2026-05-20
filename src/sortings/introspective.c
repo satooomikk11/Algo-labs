@@ -6,17 +6,17 @@
 
 static void introspective_rec(int* arr, size_t low, size_t high, int depth_limit, int threshold)
 {
-    size_t n = high - low + 1;
+    size_t size = high - low + 1;
     
-    if (n <= (size_t)threshold)
+    if (size <= (size_t)threshold)
     {
-        shell_sort(arr + low, n);
+        shell_sort(arr + low, size);
         return;
     }
     
     if (depth_limit <= 0)
     {
-        heap_sort_k(arr + low, n, 4);  // k = 4
+        heap_sort_k(arr + low, size, 4);  // k = 4
         return;
     }
     
@@ -43,8 +43,8 @@ static void introspective_rec(int* arr, size_t low, size_t high, int depth_limit
     }
 }
 
-void introspective_sort(int* arr, size_t n, int depth_limit, int threshold)
+void introspective_sort(int* arr, size_t size, int depth_limit, int threshold)
 {
-    if (n <= 1) return;
-    introspective_rec(arr, 0, n - 1, depth_limit, threshold);
+    if (size <= 1) return;
+    introspective_rec(arr, 0, size - 1, depth_limit, threshold);
 }

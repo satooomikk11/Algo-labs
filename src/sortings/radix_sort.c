@@ -2,42 +2,61 @@
 #include <stdlib.h>
 #include <string.h>
 
-void radix_sort_lsd(int* arr, size_t n)
+#define BITS_PER_BYTE 8
+#define BYTES_IN_INT  4
+#define RADIX_SIZE    256
+
+void radix_sort_lsd(int* arr, size_t size)
 {
-    if (n <= 1) return;
+    if (size <= 1) return;
     
-    int* output = calloc(n,   sizeof(int));
-    int* count  = calloc(256, sizeof(int));
-    int* buffer = calloc(n,   sizeof(int));
+    int min = arr[0];
+    for (size_t i = 1; i < size; i++)
+    {
+        if (arr[i] < min) min = arr[i];
+    }
+    
+    if (min < 0)
+    {
+        for (size_t i = 0; i < size; i++)
+        {
+            arr[i] -= min;
+        }
+    }
+    
+    int* output = calloc(size, sizeof(int));
+    int* count  = calloc(RADIX_SIZE, sizeof(int));
+    int* buffer = calloc(size, sizeof(int));
 
     if (!output || !count || !buffer)
     {
         free(output);
         free(count);
+        free(buffer);
         return;
     }
     
     int* src = arr;
     int* dst = output;
     
-    for (int byte = 0; byte < 4; byte++)
+    for (int byte = 0; byte < BYTES_IN_INT; byte++)
     {
-        memset(count, 0, 256 * sizeof(int));
+        memset(count, 0, RADIX_SIZE * sizeof(int));
         
-        for (size_t i = 0; i < n; i++)
+        for (size_t i = 0; i < size; i++)
         {
-            int digit = (src[i] >> (byte * 8)) & 0xFF;
+            int digit = (src[i] >> (byte * BITS_PER_BYTE)) & (RADIX_SIZE - 1);
             count[digit]++;
         }
         
-        for (int i = 1; i < 256; i++)
+        for (int i = 1; i < RADIX_SIZE; i++)
         {
             count[i] += count[i - 1];
         }
         
-        for (size_t i = n; i > 0; i--)
+        for (size_t i = size; i > 0; i--)
         {
-            int digit = (src[i - 1] >> (byte * 8)) & 0xFF;
+            int digit = (src[i - 1] >> (byte * BITS_PER_BYTE)) & (RADIX_SIZE - 1);
             dst[--count[digit]] = src[i - 1];
         }
         
@@ -48,45 +67,53 @@ void radix_sort_lsd(int* arr, size_t n)
     
     if (src != arr)
     {
-        memcpy(arr, src, n * sizeof(int));
+        memcpy(arr, src, size * sizeof(int));
     }
     
     free(output);
     free(count);
     free(buffer);
+    
+    if (min < 0)
+    {
+        for (size_t i = 0; i < size; i++)
+        {
+            arr[i] += min;
+        }
+    }
 }
 
-static void radix_sort_msd_rec(int* arr, size_t n, int byte, 
+static void radix_sort_msd_rec(int* arr, size_t size, int byte, 
                                int* count, int* output)
 {
-    if (n <= 1 || byte < 0) return;
+    if (size <= 1 || byte < 0) return;
     
-    memset(count, 0, 256 * sizeof(int));
+    memset(count, 0, RADIX_SIZE * sizeof(int));
     
-    for (size_t i = 0; i < n; i++)
+    for (size_t i = 0; i < size; i++)
     {
-        int digit = (arr[i] >> (byte * 8)) & 0xFF;
+        int digit = (arr[i] >> (byte * BITS_PER_BYTE)) & (RADIX_SIZE - 1);
         count[digit]++;
     }
     
-    for (int i = 1; i < 256; i++)
+    for (int i = 1; i < RADIX_SIZE; i++)
     {
         count[i] += count[i - 1];
     }
     
-    for (size_t i = n; i > 0; i--)
+    for (size_t i = size; i > 0; i--)
     {
-        int digit = (arr[i - 1] >> (byte * 8)) & 0xFF;
+        int digit = (arr[i - 1] >> (byte * BITS_PER_BYTE)) & (RADIX_SIZE - 1);
         output[--count[digit]] = arr[i - 1];
     }
     
-    memcpy(arr, output, n * sizeof(int));
+    memcpy(arr, output, size * sizeof(int));
     
     int start = 0;
-    for (int i = 0; i < 256; i++)
+    for (int i = 0; i < RADIX_SIZE; i++)
     {
         size_t group_size = 0;
-        for (size_t j = start; j < n && ((arr[j] >> (byte * 8)) & 0xFF) == i; j++)
+        for (size_t j = start; j < size && ((arr[j] >> (byte * BITS_PER_BYTE)) & (RADIX_SIZE - 1)) == i; j++)
         {
             group_size++;
         }
@@ -100,22 +127,52 @@ static void radix_sort_msd_rec(int* arr, size_t n, int byte,
     }
 }
 
-void radix_sort_msd(int* arr, size_t n)
+void radix_sort_msd(int* arr, size_t size)
 {
-    if (n <= 1) return;
+    if (size <= 1) return;
     
-    int* count  = calloc(256, sizeof(int));
-    int* output = calloc(n,   sizeof(int));
+    int min = arr[0];
+    for (size_t i = 1; i < size; i++)
+    {
+        if (arr[i] < min) min = arr[i];
+    }
+    
+    if (min < 0)
+    {
+        for (size_t i = 0; i < size; i++)
+        {
+            arr[i] -= min;
+        }
+    }
+    
+    int* count  = calloc(RADIX_SIZE, sizeof(int));
+    int* output = calloc(size, sizeof(int));
     
     if (!count || !output)
     {
         free(count);
         free(output);
+        
+        if (min < 0)
+        {
+            for (size_t i = 0; i < size; i++)
+            {
+                arr[i] += min;
+            }
+        }
         return;
     }
     
-    radix_sort_msd_rec(arr, n, 3, count, output);
+    radix_sort_msd_rec(arr, size, BYTES_IN_INT - 1, count, output);
     
     free(count);
     free(output);
+    
+    if (min < 0)
+    {
+        for (size_t i = 0; i < size; i++)
+        {
+            arr[i] += min;
+        }
+    }
 }
