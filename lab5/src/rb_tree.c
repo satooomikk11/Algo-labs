@@ -132,6 +132,11 @@ static void rb_insert_fixup(RBTree* tree, RBNode* z)
 
 void rb_insert(RBTree* tree, int key)
 {
+    if (rb_find(tree, key) != tree->nil)
+    {
+        return;
+    }
+
     RBNode* z = rb_create_node(tree, key, RED);
     if (z == NULL) return;
     
